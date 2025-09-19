@@ -1,0 +1,17 @@
+meta {
+  name: Create Topic
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/pubsub/v1/topics
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name":"test"
+  }
+}

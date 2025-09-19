@@ -1,0 +1,21 @@
+meta {
+  name: Delete Topic
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{baseUrl}}/pubsub/v1/topics/:name
+  body: json
+  auth: inherit
+}
+
+params:path {
+  name: orders
+}
+
+body:json {
+  {
+    "name":"test"
+  }
+}

@@ -1,0 +1,11 @@
+meta {
+  name: List Topics
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/pubsub/v1/topics
+  body: none
+  auth: inherit
+}
