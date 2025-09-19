@@ -224,6 +224,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ by the Syntra Team**
+**Built with ❤️ by the SyntheticAPI Team**
 
 *Making API testing simple, reliable, and intelligent.*
