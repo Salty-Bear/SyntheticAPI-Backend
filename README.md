@@ -1,229 +1,173 @@
-# Syntra 🚀
-
-**Intelligent Synthetic Data Generation for API Testing**
+# Syntra - Reverse Tunnel System for API Testing
 
 Syntra is a comprehensive full-stack SaaS platform that automatically generates synthetic data and test cases for your backend API endpoints. It seamlessly integrates with your localhost environment, runs iterative tests, and provides detailed analytics on your API performance and reliability.
 
-## ✨ Features
+## 🌟 Features
 
-- **🎯 Smart Synthetic Data Generation**: AI-powered data generation tailored to your API schemas
-- **⚡ Real-time API Testing**: Automated test case execution against your endpoints
-- **🔄 Localhost Integration**: Direct connection to your development environment
-- **📊 Comprehensive Analytics**: Detailed test results, performance metrics, and failure analysis
-- **🎨 Modern UI/UX**: Clean, intuitive interface built with Next.js
-- **⚙️ High Performance Backend**: Lightning-fast Go Fiber backend for optimal performance
-- **📈 Test Iteration Management**: Track and compare test runs over time
-- **🛡️ Data Privacy**: All testing happens locally - your data never leaves your environment
+- **Reverse Tunnels**: Expose your localhost to the internet securely (like Ngrok/Cloudflared)
+- **WebSocket-based**: Real-time, persistent connections with automatic reconnection
+- **API Testing**: Automated test case generation and execution
+- **Analytics**: Detailed performance metrics and test results
+- **Cross-platform CLI**: Works on Windows, macOS, and Linux
+- **RESTful API**: Complete API for integration with your applications
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │    Backend      │    │   Your API      │
-│   (Next.js)     │◄──►│  (Go Fiber)     │◄──►│  (Localhost)    │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-        │                       │                       │
-        ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Web Interface  │    │ Data Generator  │    │  Test Results   │
-│  Test Config    │    │ Test Executor   │    │   Storage       │
-│   Analytics     │    │   API Client    │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Syntra CLI    │◄──►│  Go Fiber Server │◄──►│ Testing Engine  │
+│  (User's PC)    │    │  (Your Backend)  │    │   (API Tests)   │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                        │                        │
+    localhost:3000          WebSocket Tunnel         Test Results
+                                  │
+                    ┌──────────────────┐
+                    │  Reverse Proxy   │
+                    │ *.syntra.dev     │
+                    └──────────────────┘
 ```
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-- **Node.js** (v18 or higher)
-- **Go** (v1.19 or higher)
-- **Docker** (optional, for containerized deployment)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/syntra.git
-   cd syntra
-   ```
-
-2. **Frontend Setup**
-   ```bash
-   cd frontend
-   npm install
-   cp .env.example .env.local
-   # Configure your environment variables
-   npm run dev
-   ```
-
-3. **Backend Setup**
-   ```bash
-   cd backend
-   go mod tidy
-   cp .env.example .env
-   # Configure your environment variables
-   go run main.go
-   ```
-
-4. **Access the Application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8080
-
-### Docker Setup (Alternative)
+### 1. Start the Syntra Server
 
 ```bash
-# Build and run with Docker Compose
-docker-compose up --build
-
-# Or run individual containers
-docker build -t syntra-frontend ./frontend
-docker build -t syntra-backend ./backend
-docker run -p 3000:3000 syntra-frontend
-docker run -p 8080:8080 syntra-backend
+cd /Users/aryaman.raj/projects/Syntra
+go run main.go
 ```
 
-## 📖 Usage
+The server will start on port 8080 by default.
 
-### 1. Configure Your API
-- Navigate to the **Settings** page
-- Add your API base URL (e.g., `http://localhost:4000`)
-- Import your OpenAPI/Swagger specification or manually define endpoints
+### 2. Build and Use the CLI
 
-### 2. Generate Test Data
-- Select the endpoints you want to test
-- Configure data generation parameters:
-  - Data types and constraints
-  - Volume of test cases
-  - Complexity levels
-- Click **Generate Synthetic Data**
+```bash
+# Build the CLI
+cd cli
+go build -o syntra .
 
-### 3. Run Tests
-- Review generated test cases
-- Customize test scenarios if needed
-- Execute tests against your API
-- Monitor real-time progress
-
-### 4. Analyze Results
-- View comprehensive test reports
-- Identify failing endpoints and error patterns
-- Export results for further analysis
-- Track performance trends over time
-
-## 🛠️ Configuration
-
-### Frontend Configuration (.env.local)
-```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
-NEXT_PUBLIC_APP_NAME=Syntra
-NEXT_PUBLIC_VERSION=1.0.0
+# Connect your localhost:3000 to the internet
+./syntra connect 3000
 ```
 
-### Backend Configuration (.env)
-```env
-PORT=8080
-ENVIRONMENT=development
-DATABASE_URL=sqlite://syntra.db
-CORS_ORIGINS=http://localhost:3000
-LOG_LEVEL=info
+You'll see output like:
+```
+🚀 Starting Syntra tunnel...
+📡 Server: wss://localhost:8080
+👤 User ID: user123
+🔌 Local Port: 3000
+
+🎉 Tunnel established!
+🆔 Tunnel ID: abc123-def456
+🌐 Public URL: https://user123-abc123.syntra.dev
+🔀 Forwarding: https://user123-abc123.syntra.dev -> localhost:3000
+
+💡 You can now access your local app at: https://user123-abc123.syntra.dev
 ```
 
-## 🔧 API Reference
+### 3. Test Your API
 
-### Core Endpoints
+```bash
+# Create a test suite
+curl -X POST http://localhost:8080/test/suites \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My API Tests",
+    "base_url": "https://user123-abc123.syntra.dev",
+    "test_cases": [
+      {
+        "name": "Health Check",
+        "method": "GET",
+        "path": "/health",
+        "expected": {
+          "status_code": 200
+        }
+      }
+    ]
+  }'
 
-#### Generate Test Data
-```http
-POST /api/v1/generate
-Content-Type: application/json
-
-{
-  "endpoint": "/api/users",
-  "method": "POST",
-  "schema": {...},
-  "count": 100,
-  "complexity": "medium"
-}
+# Execute the test suite
+curl -X POST http://localhost:8080/test/suites/{suite-id}/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tunnel_url": "https://user123-abc123.syntra.dev"
+  }'
 ```
 
-#### Execute Tests
-```http
-POST /api/v1/test/execute
-Content-Type: application/json
+## 📡 API Endpoints
 
-{
-  "target_url": "http://localhost:4000",
-  "test_cases": [...],
-  "config": {...}
-}
+### Tunnel Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/tunnel/ws/connect` | WebSocket endpoint for CLI connections |
+| `POST` | `/tunnel/create` | Create a new tunnel (REST API) |
+| `GET` | `/tunnel/:tunnelId` | Get tunnel information |
+| `GET` | `/tunnel/user/:userId` | Get user's active tunnels |
+| `DELETE` | `/tunnel/:tunnelId` | Terminate a tunnel |
+| `GET` | `/tunnel/active` | List all active tunnels |
+| `GET` | `/tunnel/health/:subdomain` | Check tunnel health |
+| `GET` | `/tunnel/stats/:subdomain` | Get tunnel statistics |
+
+### API Testing
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/test/suites` | Create a test suite |
+| `GET` | `/test/suites/:suiteId` | Get test suite details |
+| `POST` | `/test/suites/:suiteId/execute` | Execute a test suite |
+| `GET` | `/test/executions/:executionId` | Get execution results |
+| `POST` | `/test/generate` | Generate test cases automatically |
+
+## 🔧 CLI Usage
+
+### Basic Commands
+
+```bash
+# Connect with default settings
+syntra connect 3000
+
+# Specify user ID and server
+syntra connect 3000 --user-id=myuser --server=ws://localhost:8080
+
+# Use environment variables
+export SYNTRA_USER_ID=myuser
+export SYNTRA_SERVER_URL=ws://localhost:8080
+export SYNTRA_AUTH_TOKEN=your-token
+syntra connect 3000
 ```
 
-#### Get Test Results
-```http
-GET /api/v1/test/results/{test_run_id}
+### Environment Variables
+
+- `SYNTRA_SERVER_URL`: WebSocket URL of the Syntra server
+- `SYNTRA_USER_ID`: Your unique user identifier
+- `SYNTRA_AUTH_TOKEN`: Authentication token (if required)
+
+## 🛠️ Development
+
+### Project Structure
+
 ```
-
-For complete API documentation, visit `/docs` when running the backend server.
-
-## 📊 Supported Data Types
-
-- **Primitives**: String, Integer, Float, Boolean
-- **Complex Types**: Objects, Arrays, Nested structures
-- **Formats**: Email, Phone, URL, UUID, Date/Time
-- **Custom Patterns**: Regex-based generation
-- **Relationships**: Foreign keys, references
-- **Constraints**: Min/Max values, length limits, enums
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- **Frontend**: Follow Next.js best practices, use TypeScript
-- **Backend**: Follow Go conventions, write tests for new features
-- **Testing**: Ensure all tests pass before submitting PR
-- **Documentation**: Update README and API docs for new features
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support & Community
-
-- **Documentation**: [docs.syntra.dev](https://docs.syntra.dev)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/syntra/issues)
-- **Discord**: [Join our community](https://discord.gg/syntra)
-- **Email**: support@syntra.dev
-
-## 🗺️ Roadmap
-
-- [ ] **v1.1**: GraphQL endpoint support
-- [ ] **v1.2**: Advanced data relationships and constraints
-- [ ] **v1.3**: CI/CD pipeline integration
-- [ ] **v1.4**: Cloud deployment options
-- [ ] **v1.5**: Performance benchmarking tools
-- [ ] **v2.0**: Multi-language SDK support
-
-## 📸 Screenshots
-
-### Dashboard Overview
-*Coming soon - Add screenshots of your main dashboard*
-
-### Test Configuration
-*Coming soon - Add screenshots of test setup interface*
-
-### Results Analytics
-*Coming soon - Add screenshots of analytics dashboard*
+Syntra/
+├── main.go                 # Server entry point
+├── cli/                    # CLI application
+│   ├── main.go            # CLI entry point
+│   ├── go.mod             # CLI dependencies
+│   └── build.sh           # Cross-platform build script
+├── services/              # Business logic
+│   ├── connector/         # Tunnel management
+│   │   ├── store.go       # Data models
+│   │   ├── service.go     # Service interface
+│   │   ├── tunnel.go      # WebSocket handling
+│   │   └── proxy.go       # Reverse proxy
+│   └── tester/            # API testing
+│       ├── service.go     # Testing logic
+│       └── store.go       # Test data storage
+├── routes/                # HTTP handlers
+│   ├── connector/         # Tunnel endpoints
+│   └── tester/            # Testing endpoints
+└── config/                # Configuration
+```
 
 ---
 
-**Built with ❤️ by the SyntheticAPI Team**
-
-*Making API testing simple, reliable, and intelligent.*
+**Syntra** - Making localhost global, one tunnel at a time! 🚀
