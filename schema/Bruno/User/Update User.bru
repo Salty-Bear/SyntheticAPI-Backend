@@ -1,0 +1,24 @@
+meta {
+  name: Update User
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/user/v1/{{userId}}
+  body: json
+  auth: inherit
+}
+
+vars:pre-request {
+  userId: user-123
+}
+
+body:json {
+  {
+    "name": "John Doe Updated",
+    "phone": "+1234567891",
+    "enabled": true,
+    "profile_pic": "https://example.com/new-profile.jpg"
+  }
+}

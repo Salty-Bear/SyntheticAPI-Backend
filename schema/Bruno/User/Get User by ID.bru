@@ -1,0 +1,15 @@
+meta {
+  name: Get User by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/user/v1/{{userId}}
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  userId: user-123
+}
