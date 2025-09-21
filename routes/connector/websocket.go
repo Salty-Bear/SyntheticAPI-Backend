@@ -4,7 +4,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/Aryaman/pub-sub/services/connector"
+	"github.com/Aryaman/syntra/services/connector"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 )
