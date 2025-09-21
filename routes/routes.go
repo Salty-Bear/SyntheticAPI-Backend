@@ -1,18 +1,23 @@
 package routes
 
 import (
+	"github.com/Aryaman/pub-sub/providers"
 	"github.com/Aryaman/pub-sub/routes/connector"
 	"github.com/Aryaman/pub-sub/routes/pubsub"
 	"github.com/Aryaman/pub-sub/routes/tester"
+	"github.com/Aryaman/pub-sub/routes/user"
 	connectorService "github.com/Aryaman/pub-sub/services/connector"
 	testerService "github.com/Aryaman/pub-sub/services/tester"
 	"github.com/gofiber/fiber/v2"
 )
 
 // RegisterRoutes registers all main API routes
-func RegisterRoutes(app *fiber.App) {
+func RegisterRoutes(app *fiber.App, provider *providers.Provider) {
 	// PubSub routes
 	pubsub.RegisterRoutes(app.Group("/pubsub"))
+
+	// User routes
+	user.RegisterRoutes(app.Group("/users"))
 
 	// Connector/Tunnel routes
 	setupConnectorRoutes(app)

@@ -331,7 +331,7 @@ func (s *ServiceImpl) CreateTopic(ctx context.Context, c *fiber.Ctx) error {
 	var req sdk.CreateTopicRequest
 
 	if err := c.BodyParser(&req); err != nil || req.Name == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(sdk.ErrorResponse{
+		return c.Status(fiber.StatusBadRequest).JSON(sdk.PubSubErrorResponse{
 			Error: "invalid request - name required",
 		})
 	}
@@ -365,7 +365,7 @@ func (s *ServiceImpl) CreateTopic(ctx context.Context, c *fiber.Ctx) error {
 func (s *ServiceImpl) DeleteTopic(ctx context.Context, c *fiber.Ctx) error {
 	name := c.Params("name")
 	if name == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(sdk.ErrorResponse{
+		return c.Status(fiber.StatusBadRequest).JSON(sdk.PubSubErrorResponse{
 			Error: "missing topic name",
 		})
 	}
@@ -374,7 +374,7 @@ func (s *ServiceImpl) DeleteTopic(ctx context.Context, c *fiber.Ctx) error {
 	topic, exists := s.Topics[name]
 	if !exists {
 		s.mu.Unlock()
-		return c.Status(fiber.StatusNotFound).JSON(sdk.ErrorResponse{
+		return c.Status(fiber.StatusNotFound).JSON(sdk.PubSubErrorResponse{
 			Error: "topic not found",
 		})
 	}

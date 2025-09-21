@@ -12,6 +12,8 @@ import (
 type AppConfig struct {
 	Server     Server
 	Deployment Deployment
+	Firebase   Firebase
+	Database   Database
 }
 
 func NewAppConfig() *AppConfig {
@@ -46,6 +48,8 @@ func (a *AppConfig) Load() {
 	}
 	a.LoadServerConfig()
 	a.LoadDeploymentConfig()
+	a.LoadFirebaseConfig()
+	a.LoadDatabaseConfig()
 }
 
 // LoadServerConfig load server config
@@ -92,5 +96,29 @@ func (a *AppConfig) LoadDeploymentConfig() {
 	name := os.Getenv("DEPLOYMENT_NAME")
 	if name != "" {
 		a.Deployment.Name = name
+	}
+}
+
+// LoadFirebaseConfig loads the Firebase configuration
+func (a *AppConfig) LoadFirebaseConfig() {
+	// load the default values
+	// then load from env variables
+	a.Firebase.ProjectID = ""
+
+	projectID := os.Getenv("FIREBASE_PROJECT_ID")
+	if projectID != "" {
+		a.Firebase.ProjectID = projectID
+	}
+}
+
+// LoadDatabaseConfig loads the database configuration
+func (a *AppConfig) LoadDatabaseConfig() {
+	// load the default values
+	// then load from env variables
+	a.Database.MongoURL = "mongodb://localhost:27017"
+
+	mongoURL := os.Getenv("MONGO_URL")
+	if mongoURL != "" {
+		a.Database.MongoURL = mongoURL
 	}
 }

@@ -113,7 +113,7 @@ type StatsResponse struct {
 }
 
 // Error Response for HTTP APIs
-type ErrorResponse struct {
+type PubSubErrorResponse struct {
 	Error string `json:"error"`
 }
 

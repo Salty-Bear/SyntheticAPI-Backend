@@ -2,17 +2,27 @@ package providers
 
 import (
 	"github.com/Aryaman/pub-sub/config"
+	"github.com/Aryaman/pub-sub/db"
 	"github.com/gofiber/fiber/v2"
 )
 
 type Provider struct {
-	S *Service
+	S  *Service
+	DB db.DB
 }
 
 func InjectDefaultProviders(cnf config.AppConfig) (*Provider, error) {
-	svcs := NewServicesWithConfig(cnf)
+	// Initialize MongoDB connection
+	mongoConn, err := db.NewMongoConnection(cnf.Database.MongoURL)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Initialize services with database connection
+	svcs := NewServicesWithConfig(cnf, mongoConn)
 	return &Provider{
-		S: svcs,
+		S:  svcs,
+		DB: mongoConn,
 	}, nil
 }
 
