@@ -3,8 +3,8 @@ package providers
 import (
 	"github.com/Aryaman/syntra/config"
 	"github.com/Aryaman/syntra/db"
+	user "github.com/Aryaman/syntra/services/User"
 	"github.com/Aryaman/syntra/services/pubsub"
-	"github.com/Aryaman/syntra/services/user"
 )
 
 type Service struct {
