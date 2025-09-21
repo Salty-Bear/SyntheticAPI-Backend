@@ -2,7 +2,8 @@ package user
 
 import (
 	"context"
-	"github.com/Aryaman/pub-sub/sdk"
+
+	"github.com/Aryaman/syntra/sdk"
 )
 
 // UserService defines the interface for user management operations

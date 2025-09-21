@@ -1,8 +1,8 @@
 package providers
 
 import (
-	"github.com/Aryaman/pub-sub/config"
-	"github.com/Aryaman/pub-sub/db"
+	"github.com/Aryaman/syntra/config"
+	"github.com/Aryaman/syntra/db"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,7 +17,7 @@ func InjectDefaultProviders(cnf config.AppConfig) (*Provider, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Initialize services with database connection
 	svcs := NewServicesWithConfig(cnf, mongoConn)
 	return &Provider{

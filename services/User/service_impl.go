@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Aryaman/pub-sub/db/models"
-	"github.com/Aryaman/pub-sub/sdk"
+	"github.com/Aryaman/syntra/db/models"
+	"github.com/Aryaman/syntra/sdk"
 )
 
 // ServiceImpl implements the UserService interface
@@ -103,15 +103,15 @@ func (s *ServiceImpl) List(ctx context.Context, query *sdk.UserQuery) ([]*sdk.Us
 	if query != nil && query.Limit > 0 {
 		start := query.Offset
 		end := start + query.Limit
-		
+
 		if start >= len(users) {
 			return []*sdk.User{}, nil
 		}
-		
+
 		if end > len(users) {
 			end = len(users)
 		}
-		
+
 		users = users[start:end]
 	}
 
@@ -213,7 +213,7 @@ func (s *ServiceImpl) Delete(ctx context.Context, id string) error {
 func (s *ServiceImpl) VerifyFirebaseToken(ctx context.Context, token string) (*sdk.FirebaseUser, error) {
 	// Use Google's tokeninfo endpoint to verify the ID token
 	url := fmt.Sprintf("https://oauth2.googleapis.com/tokeninfo?id_token=%s", token)
-	
+
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)

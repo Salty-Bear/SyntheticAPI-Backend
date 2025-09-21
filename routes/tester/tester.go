@@ -3,7 +3,7 @@ package tester
 import (
 	"time"
 
-	"github.com/Aryaman/pub-sub/services/tester"
+	"github.com/Aryaman/syntra/services/tester"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )

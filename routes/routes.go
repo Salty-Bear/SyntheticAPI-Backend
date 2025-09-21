@@ -1,13 +1,13 @@
 package routes
 
 import (
-	"github.com/Aryaman/pub-sub/providers"
-	"github.com/Aryaman/pub-sub/routes/connector"
-	"github.com/Aryaman/pub-sub/routes/pubsub"
-	"github.com/Aryaman/pub-sub/routes/tester"
-	"github.com/Aryaman/pub-sub/routes/user"
-	connectorService "github.com/Aryaman/pub-sub/services/connector"
-	testerService "github.com/Aryaman/pub-sub/services/tester"
+	"github.com/Aryaman/syntra/providers"
+	"github.com/Aryaman/syntra/routes/connector"
+	"github.com/Aryaman/syntra/routes/pubsub"
+	"github.com/Aryaman/syntra/routes/tester"
+	"github.com/Aryaman/syntra/routes/user"
+	connectorService "github.com/Aryaman/syntra/services/connector"
+	testerService "github.com/Aryaman/syntra/services/tester"
 	"github.com/gofiber/fiber/v2"
 )
 

@@ -5,9 +5,9 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 
-	"github.com/Aryaman/pub-sub/config"
-	"github.com/Aryaman/pub-sub/providers"
-	"github.com/Aryaman/pub-sub/routes"
+	"github.com/Aryaman/syntra/config"
+	"github.com/Aryaman/syntra/providers"
+	"github.com/Aryaman/syntra/routes"
 )
 
 func main() {

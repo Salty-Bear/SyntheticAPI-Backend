@@ -1,4 +1,4 @@
-module github.com/Aryaman/pub-sub
+module github.com/Aryaman/syntra
 
 go 1.23
 

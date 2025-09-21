@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Aryaman/pub-sub/providers"
-	"github.com/Aryaman/pub-sub/sdk"
+	"github.com/Aryaman/syntra/providers"
+	"github.com/Aryaman/syntra/sdk"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/google/uuid"
