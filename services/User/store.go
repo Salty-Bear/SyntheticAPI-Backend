@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/Aryaman/pub-sub/db/models"
+	"github.com/Aryaman/syntra/db/models"
 )
 
 // UserStore defines the interface for user data access operations
