@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Aryaman/pub-sub/sdk"
+	"github.com/Aryaman/syntra/sdk"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"

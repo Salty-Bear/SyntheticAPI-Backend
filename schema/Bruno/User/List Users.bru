@@ -1,0 +1,18 @@
+meta {
+  name: List Users
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/user/v1/
+  body: none
+  auth: inherit
+}
+
+params:query {
+  project_id: project-123
+  enabled: true
+  page: 1
+  limit: 10
+}
