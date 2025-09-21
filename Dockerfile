@@ -10,17 +10,17 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary
-RUN go build -o pubsub main.go
+RUN go build -o syntra main.go
 
 # Run stage
 FROM alpine:3.18
 WORKDIR /app
 
 # Copy the built binary
-COPY --from=builder /app/pubsub .
+COPY --from=builder /app/syntra .
 
 # Expose port
 EXPOSE 3000
 
 # Run the binary
-CMD ["./pubsub"]
+CMD ["./syntra"]
