@@ -11,3 +11,11 @@ type Deployment struct {
 	Environment string
 	Name        string
 }
+
+type Firebase struct {
+	ProjectID string
+}
+
+type Database struct {
+	MongoURL string
+}
