@@ -1,0 +1,15 @@
+meta {
+  name: Delete User
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/user/v1/{{userId}}
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  userId: user-123
+}
