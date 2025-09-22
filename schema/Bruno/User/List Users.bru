@@ -5,14 +5,13 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/user/v1/
+  url: {{baseUrl}}/users/v1/?enabled=false&page=1&limit=1
   body: none
   auth: inherit
 }
 
 params:query {
-  project_id: project-123
-  enabled: true
+  enabled: false
   page: 1
-  limit: 10
+  limit: 1
 }

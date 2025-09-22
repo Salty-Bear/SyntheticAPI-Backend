@@ -5,13 +5,9 @@ meta {
 }
 
 put {
-  url: {{baseUrl}}/user/v1/{{userId}}
+  url: {{baseUrl}}/users/v1/5951cdb0-241e-4cc0-87bf-e689c39bfb5c
   body: json
   auth: inherit
-}
-
-vars:pre-request {
-  userId: user-123
 }
 
 body:json {
@@ -21,4 +17,8 @@ body:json {
     "enabled": true,
     "profile_pic": "https://example.com/new-profile.jpg"
   }
+}
+
+vars:pre-request {
+  userId: user-123
 }

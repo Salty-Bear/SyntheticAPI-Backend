@@ -1,4 +1,19 @@
-# Syntra - Reverse Tunnel System for API Testing
+<div align="center">
+  <img src="./assets/logo.png" alt="Syntra Logo" width="200" height="auto">
+  
+  # Syntra
+  ### Reverse Tunnel System for API Testing
+  
+  <p>
+    <em>Making localhost global, one tunnel at a time! 🚀</em>
+  </p>
+  
+  [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+  [![Go Version](https://img.shields.io/badge/go-%3E%3D1.19-blue.svg)](https://golang.org)
+  [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+</div>
+
+---
 
 Syntra is a comprehensive full-stack SaaS platform that automatically generates synthetic data and test cases for your backend API endpoints. It seamlessly integrates with your localhost environment, runs iterative tests, and provides detailed analytics on your API performance and reliability.
 
@@ -149,6 +164,8 @@ syntra connect 3000
 ```
 Syntra/
 ├── main.go                 # Server entry point
+├── assets/                 # Project assets
+│   └── logo.png           # Syntra logo
 ├── cli/                    # CLI application
 │   ├── main.go            # CLI entry point
 │   ├── go.mod             # CLI dependencies
@@ -168,6 +185,16 @@ Syntra/
 └── config/                # Configuration
 ```
 
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ---
 
-**Syntra** - Making localhost global, one tunnel at a time! 🚀
+<div align="center">
+  <p><strong>Syntra</strong> - Making localhost global, one tunnel at a time! 🚀</p>
+</div>

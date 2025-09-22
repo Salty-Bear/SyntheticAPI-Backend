@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/Aryaman/pub-sub/db"
-	"github.com/Aryaman/pub-sub/db/models"
+	"github.com/Aryaman/syntra/db"
+	"github.com/Aryaman/syntra/db/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -33,7 +33,7 @@ func (s *StoreImpl) CreateUser(ctx context.Context, user *models.User) error {
 // GetUserByID retrieves a user by their ID from MongoDB
 func (s *StoreImpl) GetUserByID(ctx context.Context, userID string) (*models.User, error) {
 	filter := bson.M{s.model.IdKey: userID}
-	
+
 	result := s.db.FindOne(ctx, s.model, filter)
 	if result.Err() != nil {
 		if result.Err() == mongo.ErrNoDocuments {
@@ -53,7 +53,7 @@ func (s *StoreImpl) GetUserByID(ctx context.Context, userID string) (*models.Use
 // GetUserByEmail retrieves a user by their email address from MongoDB
 func (s *StoreImpl) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	filter := bson.M{s.model.EmailKey: email}
-	
+
 	result := s.db.FindOne(ctx, s.model, filter)
 	if result.Err() != nil {
 		if result.Err() == mongo.ErrNoDocuments {
@@ -73,10 +73,10 @@ func (s *StoreImpl) GetUserByEmail(ctx context.Context, email string) (*models.U
 // GetUsers retrieves all users with optional filtering
 func (s *StoreImpl) GetUsers(ctx context.Context, projectID string, enabled *bool) ([]*models.User, error) {
 	filter := bson.M{}
-	
+
 	// Note: ProjectID field has been removed from the User model
 	// If project-based filtering is needed, it should be implemented differently
-	
+
 	if enabled != nil {
 		filter[s.model.EnabledKey] = *enabled
 	}
@@ -106,12 +106,12 @@ func (s *StoreImpl) GetUsers(ctx context.Context, projectID string, enabled *boo
 // UpdateUser updates an existing user in MongoDB
 func (s *StoreImpl) UpdateUser(ctx context.Context, userID string, updates map[string]interface{}) error {
 	filter := bson.M{s.model.IdKey: userID}
-	
+
 	// Add updated timestamp
 	updates["updated_at"] = time.Now()
-	
+
 	update := bson.M{"$set": updates}
-	
+
 	result, err := s.db.UpdateOne(ctx, s.model, filter, update)
 	if err != nil {
 		return err
@@ -127,7 +127,7 @@ func (s *StoreImpl) UpdateUser(ctx context.Context, userID string, updates map[s
 // DeleteUser deletes a user by their ID from MongoDB
 func (s *StoreImpl) DeleteUser(ctx context.Context, userID string) error {
 	filter := bson.M{s.model.IdKey: userID}
-	
+
 	result, err := s.db.DeleteOne(ctx, s.model, filter)
 	if err != nil {
 		return err
@@ -143,7 +143,7 @@ func (s *StoreImpl) DeleteUser(ctx context.Context, userID string) error {
 // UserExists checks if a user exists by ID in MongoDB
 func (s *StoreImpl) UserExists(ctx context.Context, userID string) (bool, error) {
 	filter := bson.M{s.model.IdKey: userID}
-	
+
 	result := s.db.FindOne(ctx, s.model, filter)
 	if result.Err() != nil {
 		if result.Err() == mongo.ErrNoDocuments {
@@ -158,7 +158,7 @@ func (s *StoreImpl) UserExists(ctx context.Context, userID string) (bool, error)
 // EmailExists checks if a user exists by email in MongoDB
 func (s *StoreImpl) EmailExists(ctx context.Context, email string) (bool, error) {
 	filter := bson.M{s.model.EmailKey: email}
-	
+
 	result := s.db.FindOne(ctx, s.model, filter)
 	if result.Err() != nil {
 		if result.Err() == mongo.ErrNoDocuments {

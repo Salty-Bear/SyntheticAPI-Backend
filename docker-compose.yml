@@ -1,9 +1,9 @@
 services:
-  pubsub:
+  syntra:
     build:
       context: .   # current folder (backend)
       dockerfile: Dockerfile
-    container_name: pubsub_service
+    container_name: syntra_service
     ports:
       - "3000:3000"
     environment:
