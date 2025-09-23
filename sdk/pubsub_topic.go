@@ -25,6 +25,16 @@ type Subscriber struct {
 	CloseChannel chan struct{}
 }
 
+// TunnelClient represents a CLI client connected for tunneling
+type TunnelClient struct {
+	Conn         *websocket.Conn
+	ClientID     string
+	LastActive   time.Time
+	IsConnected  bool
+	ResponseChan chan TunnelHTTPResponse // For async response handling
+	Mu           sync.RWMutex
+}
+
 // Topic holds subscribers and implements ring buffer for message replay
 type Topic struct {
 	Name        string
@@ -50,6 +60,24 @@ type WebSocketRequest struct {
 	ClientID  string   `json:"client_id,omitempty"`
 	LastN     int      `json:"last_n,omitempty"`
 	RequestID string   `json:"request_id,omitempty"`
+	// Tunnel-specific fields
+	TunnelRequest *TunnelHTTPRequest `json:"tunnel_request,omitempty"`
+}
+
+// TunnelHTTPRequest represents an HTTP request to be tunneled
+type TunnelHTTPRequest struct {
+	Method  string            `json:"method"`
+	Path    string            `json:"path"`
+	Body    string            `json:"body"`
+	Headers map[string]string `json:"headers,omitempty"`
+}
+
+// TunnelHTTPResponse represents an HTTP response from tunneled request
+type TunnelHTTPResponse struct {
+	StatusCode int               `json:"status_code"`
+	Body       string            `json:"body"`
+	Headers    map[string]string `json:"headers,omitempty"`
+	Error      string            `json:"error,omitempty"`
 }
 
 // WebSocketResponse represents outgoing WebSocket messages to clients
@@ -62,6 +90,8 @@ type WebSocketResponse struct {
 	Error     *ErrorDetail `json:"error,omitempty"`
 	Timestamp string       `json:"ts,omitempty"`
 	Msg       string       `json:"msg,omitempty"`
+	// Tunnel-specific fields
+	TunnelResponse *TunnelHTTPResponse `json:"tunnel_response,omitempty"`
 }
 
 // ErrorDetail represents error information in responses
@@ -128,6 +158,10 @@ const (
 	MessageTypeError       = "error"
 	MessageTypePong        = "pong"
 	MessageTypeInfo        = "info"
+	// Tunnel message types
+	MessageTypeTunnelConnect  = "tunnel_connect"
+	MessageTypeTunnelRequest  = "tunnel_request"
+	MessageTypeTunnelResponse = "tunnel_response"
 )
 
 // Constants for error codes

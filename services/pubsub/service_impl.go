@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -13,20 +14,22 @@ import (
 
 // ServiceImpl implements the PubSub interface with thread-safe operations
 type ServiceImpl struct {
-	Topics      map[string]*sdk.Topic
-	mu          sync.RWMutex
-	Uptime      time.Time
-	MaxQueue    int // per-subscriber queue size
-	MaxMessages int // per-topic ring buffer size
+	Topics        map[string]*sdk.Topic
+	TunnelClients map[string]*sdk.TunnelClient // clientID -> TunnelClient
+	mu            sync.RWMutex
+	Uptime        time.Time
+	MaxQueue      int // per-subscriber queue size
+	MaxMessages   int // per-topic ring buffer size
 }
 
 // NewService creates a new PubSub service instance with config
 func NewService(maxQueue, maxMessages int) *ServiceImpl {
 	return &ServiceImpl{
-		Topics:      make(map[string]*sdk.Topic),
-		Uptime:      time.Now(),
-		MaxQueue:    maxQueue,
-		MaxMessages: maxMessages,
+		Topics:        make(map[string]*sdk.Topic),
+		TunnelClients: make(map[string]*sdk.TunnelClient),
+		Uptime:        time.Now(),
+		MaxQueue:      maxQueue,
+		MaxMessages:   maxMessages,
 	}
 }
 
@@ -300,6 +303,67 @@ func (s *ServiceImpl) HandleWebSocket(ctx context.Context, c *websocket.Conn) {
 				Timestamp: time.Now().UTC().Format(time.RFC3339),
 			})
 
+		case sdk.MessageTypeTunnelConnect:
+			if req.ClientID == "" {
+				sendMessage("error", sdk.WebSocketResponse{
+					Type:      sdk.MessageTypeError,
+					RequestID: req.RequestID,
+					Error: &sdk.ErrorDetail{
+						Code:    sdk.ErrorCodeBadRequest,
+						Message: "client_id required for tunnel connection",
+					},
+					Timestamp: time.Now().UTC().Format(time.RFC3339),
+				})
+				continue
+			}
+
+			clientID = req.ClientID
+
+			// Create tunnel client
+			tunnelClient := &sdk.TunnelClient{
+				Conn:         c,
+				ClientID:     clientID,
+				LastActive:   time.Now(),
+				IsConnected:  true,
+				ResponseChan: make(chan sdk.TunnelHTTPResponse, 10),
+			}
+
+			// Register tunnel client
+			s.mu.Lock()
+			s.TunnelClients[clientID] = tunnelClient
+			s.mu.Unlock()
+
+			sendMessage("ack", sdk.WebSocketResponse{
+				Type:      sdk.MessageTypeAck,
+				RequestID: req.RequestID,
+				Status:    sdk.StatusOK,
+				Timestamp: time.Now().UTC().Format(time.RFC3339),
+			})
+
+		case sdk.MessageTypeTunnelResponse:
+			// CLI client is sending response back to us
+			if req.TunnelRequest != nil && clientID != "" {
+				s.mu.RLock()
+				tunnelClient, exists := s.TunnelClients[clientID]
+				s.mu.RUnlock()
+
+				if exists && tunnelClient.IsConnected {
+					// Update last active time
+					tunnelClient.Mu.Lock()
+					tunnelClient.LastActive = time.Now()
+					tunnelClient.Mu.Unlock()
+
+					// For now, just acknowledge the response
+					// In a full implementation, you'd match this with pending requests
+					sendMessage("ack", sdk.WebSocketResponse{
+						Type:      sdk.MessageTypeAck,
+						RequestID: req.RequestID,
+						Status:    sdk.StatusOK,
+						Timestamp: time.Now().UTC().Format(time.RFC3339),
+					})
+				}
+			}
+
 		default:
 			sendMessage("error", sdk.WebSocketResponse{
 				Type:      sdk.MessageTypeError,
@@ -319,6 +383,19 @@ func (s *ServiceImpl) HandleWebSocket(ctx context.Context, c *websocket.Conn) {
 		currentTopic.Mu.Lock()
 		delete(currentTopic.Subscribers, currentSub.ClientID)
 		currentTopic.Mu.Unlock()
+	}
+
+	// Cleanup tunnel client if this was a tunnel connection
+	if clientID != "" {
+		s.mu.Lock()
+		if tunnelClient, exists := s.TunnelClients[clientID]; exists {
+			tunnelClient.Mu.Lock()
+			tunnelClient.IsConnected = false
+			close(tunnelClient.ResponseChan)
+			tunnelClient.Mu.Unlock()
+			delete(s.TunnelClients, clientID)
+		}
+		s.mu.Unlock()
 	}
 
 	// Close write channel and wait for writer to finish
@@ -471,4 +548,88 @@ func (s *ServiceImpl) subscriberWriter(sub *sdk.Subscriber, topic string, sendMe
 			return
 		}
 	}
+}
+
+// SendTunnelRequest sends an HTTP request through a tunnel to a connected CLI client
+func (s *ServiceImpl) SendTunnelRequest(ctx context.Context, c *fiber.Ctx) error {
+	clientID := c.Params("client_id")
+	if clientID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(sdk.PubSubErrorResponse{
+			Error: "client_id parameter required",
+		})
+	}
+
+	var tunnelReq sdk.TunnelHTTPRequest
+	if err := c.BodyParser(&tunnelReq); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(sdk.PubSubErrorResponse{
+			Error: "invalid JSON request body",
+		})
+	}
+
+	// Validate required fields
+	if tunnelReq.Method == "" || tunnelReq.Path == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(sdk.PubSubErrorResponse{
+			Error: "method and path are required",
+		})
+	}
+
+	s.mu.RLock()
+	tunnelClient, exists := s.TunnelClients[clientID]
+	s.mu.RUnlock()
+
+	if !exists || !tunnelClient.IsConnected {
+		return c.Status(fiber.StatusNotFound).JSON(sdk.PubSubErrorResponse{
+			Error: "tunnel client not found or not connected",
+		})
+	}
+
+	// Create WebSocket request to send to CLI client
+	requestID := fmt.Sprintf("req_%d", time.Now().UnixNano())
+	wsRequest := sdk.WebSocketRequest{
+		Type:          sdk.MessageTypeTunnelRequest,
+		RequestID:     requestID,
+		ClientID:      clientID,
+		TunnelRequest: &tunnelReq,
+	}
+
+	// Send request to CLI client
+	tunnelClient.Mu.RLock()
+	conn := tunnelClient.Conn
+	tunnelClient.Mu.RUnlock()
+
+	if err := conn.WriteJSON(wsRequest); err != nil {
+		return c.Status(fiber.StatusServiceUnavailable).JSON(sdk.PubSubErrorResponse{
+			Error: "failed to send request to tunnel client",
+		})
+	}
+
+	// For now, return success immediately
+	// In a full implementation, you'd wait for the response and return it
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":     "sent",
+		"request_id": requestID,
+		"client_id":  clientID,
+		"message":    "Request sent to tunnel client",
+	})
+}
+
+// ListTunnels returns all connected tunnel clients
+func (s *ServiceImpl) ListTunnels(ctx context.Context, c *fiber.Ctx) error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	tunnels := make([]fiber.Map, 0, len(s.TunnelClients))
+	for clientID, client := range s.TunnelClients {
+		client.Mu.RLock()
+		tunnels = append(tunnels, fiber.Map{
+			"client_id":   clientID,
+			"connected":   client.IsConnected,
+			"last_active": client.LastActive.Format(time.RFC3339),
+		})
+		client.Mu.RUnlock()
+	}
+
+	return c.JSON(fiber.Map{
+		"tunnels": tunnels,
+	})
 }
