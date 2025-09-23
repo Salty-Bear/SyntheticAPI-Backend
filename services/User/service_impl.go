@@ -7,51 +7,55 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Aryaman/syntra/db/models"
 	"github.com/Aryaman/syntra/sdk"
+	"github.com/google/uuid"
 )
 
 // ServiceImpl implements the UserService interface
 type ServiceImpl struct {
-	store     UserStore
-	projectID string
+	store UserStore
 }
 
 // NewService creates a new instance of UserService
-func NewService(store UserStore, projectID string) UserService {
+func NewService(store UserStore) UserService {
 	return &ServiceImpl{
-		store:     store,
-		projectID: projectID,
+		store: store,
 	}
 }
 
-// Create creates a new user
-func (s *ServiceImpl) Create(ctx context.Context, user *sdk.User) error {
+// Create creates a new user or returns existing user if email already exists
+func (s *ServiceImpl) Create(ctx context.Context, user *sdk.User) (*sdk.User, error) {
+	// Generate ID if not provided
+	if user.ID == "" {
+		user.ID = uuid.New().String()
+	}
+
 	// Check if user with email already exists
 	exists, err := s.store.EmailExists(ctx, user.Email)
 	if err != nil {
-		return fmt.Errorf("error checking email existence: %w", err)
+		return nil, fmt.Errorf("error checking email existence: %w", err)
 	}
 	if exists {
-		return fmt.Errorf("user with this email already exists")
+		// Get existing user by email and return it
+		existingUser, err := s.store.GetUserByEmail(ctx, user.Email)
+		if err != nil {
+			return nil, fmt.Errorf("error retrieving existing user: %w", err)
+		}
+
+		// Convert database model to SDK type
+		return fromModelToSdk(existingUser), nil
 	}
 
 	// Create database model from SDK user
-	dbUser := &models.User{
-		Id:         user.ID,
-		Name:       user.Name,
-		Email:      user.Email,
-		Phone:      user.Phone,
-		Enabled:    user.Enabled,
-		ProfilePic: user.ProfilePic,
-	}
+	dbUser := fromSdkToModel(*user)
 
 	// Save user to database
-	if err := s.store.CreateUser(ctx, dbUser); err != nil {
-		return fmt.Errorf("error creating user: %w", err)
+	if err := s.store.CreateUser(ctx, &dbUser); err != nil {
+		return nil, fmt.Errorf("error creating user: %w", err)
 	}
 
-	return nil
+	// Convert back to SDK type to return
+	return fromModelToSdk(&dbUser), nil
 }
 
 // Get retrieves a user by ID
@@ -70,16 +74,7 @@ func (s *ServiceImpl) Get(ctx context.Context, id string) (*sdk.User, error) {
 	}
 
 	// Convert database model to SDK type
-	sdkUser := &sdk.User{
-		ID:         user.Id,
-		Name:       user.Name,
-		Email:      user.Email,
-		Phone:      user.Phone,
-		Enabled:    user.Enabled,
-		ProfilePic: user.ProfilePic,
-	}
-
-	return sdkUser, nil
+	return fromModelToSdk(user), nil
 }
 
 // List retrieves all users with optional filtering and pagination
@@ -118,15 +113,7 @@ func (s *ServiceImpl) List(ctx context.Context, query *sdk.UserQuery) ([]*sdk.Us
 	// Convert database models to SDK types
 	var sdkUsers []*sdk.User
 	for _, user := range users {
-		sdkUser := &sdk.User{
-			ID:         user.Id,
-			Name:       user.Name,
-			Email:      user.Email,
-			Phone:      user.Phone,
-			Enabled:    user.Enabled,
-			ProfilePic: user.ProfilePic,
-		}
-		sdkUsers = append(sdkUsers, sdkUser)
+		sdkUsers = append(sdkUsers, fromModelToSdk(user))
 	}
 
 	return sdkUsers, nil
@@ -172,16 +159,7 @@ func (s *ServiceImpl) Update(ctx context.Context, user *sdk.User) (*sdk.User, er
 	}
 
 	// Convert to SDK type
-	sdkUser := &sdk.User{
-		ID:         updatedUser.Id,
-		Name:       updatedUser.Name,
-		Email:      updatedUser.Email,
-		Phone:      updatedUser.Phone,
-		Enabled:    updatedUser.Enabled,
-		ProfilePic: updatedUser.ProfilePic,
-	}
-
-	return sdkUser, nil
+	return fromModelToSdk(updatedUser), nil
 }
 
 // Delete deletes a user by ID
@@ -239,11 +217,6 @@ func (s *ServiceImpl) VerifyFirebaseToken(ctx context.Context, token string) (*s
 
 	if err := json.NewDecoder(resp.Body).Decode(&tokenInfo); err != nil {
 		return nil, fmt.Errorf("failed to decode token info: %w", err)
-	}
-
-	// Verify audience (project ID)
-	if s.projectID != "" && tokenInfo.Aud != s.projectID {
-		return nil, fmt.Errorf("invalid audience: expected %s, got %s", s.projectID, tokenInfo.Aud)
 	}
 
 	return &sdk.FirebaseUser{

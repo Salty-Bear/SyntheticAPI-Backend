@@ -17,7 +17,7 @@ func NewServicesWithConfig(cnf config.AppConfig, database db.DB) *Service {
 
 	// Create user store and service
 	userStore := user.NewStore(database)
-	userSvc := user.NewService(userStore, cnf.Firebase.ProjectID)
+	userSvc := user.NewService(userStore)
 
 	return &Service{
 		PubSub: pubsubSvc,
