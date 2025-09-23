@@ -1,0 +1,30 @@
+meta {
+  name: Test GET Request
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/pubsub/v1/tunnel/client1/request
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "method": "GET",
+    "path": "",
+    "body": ""
+  }
+}
+
+docs {
+  # Test GET Request to Root Path
+  
+  Simple test to send a GET request to the root path of the tunneled application.
+  This is useful for testing if the tunnel is working correctly.
+}

@@ -19,4 +19,7 @@ type PubSub interface {
 	ListTopics(ctx context.Context, c *fiber.Ctx) error
 	Health(ctx context.Context, c *fiber.Ctx) error
 	Stats(ctx context.Context, c *fiber.Ctx) error
+	// Tunnel methods
+	SendTunnelRequest(ctx context.Context, c *fiber.Ctx) error
+	ListTunnels(ctx context.Context, c *fiber.Ctx) error
 }

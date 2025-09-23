@@ -1,0 +1,34 @@
+meta {
+  name: Test POST Request
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/pubsub/v1/tunnel/client1/request
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "method": "POST",
+    "path": "api/test",
+    "body": "{\"message\": \"Hello from tunnel!\", \"timestamp\": \"2023-09-23T20:00:00Z\"}",
+    "headers": {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    }
+  }
+}
+
+docs {
+  # Test POST Request
+  
+  Sends a POST request with JSON data through the tunnel.
+  This tests that the tunnel can handle request bodies and headers correctly.
+}

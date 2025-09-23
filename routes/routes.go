@@ -2,11 +2,9 @@ package routes
 
 import (
 	"github.com/Aryaman/syntra/providers"
-	"github.com/Aryaman/syntra/routes/connector"
 	"github.com/Aryaman/syntra/routes/pubsub"
 	"github.com/Aryaman/syntra/routes/tester"
 	"github.com/Aryaman/syntra/routes/user"
-	connectorService "github.com/Aryaman/syntra/services/connector"
 	testerService "github.com/Aryaman/syntra/services/tester"
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,31 +17,8 @@ func RegisterRoutes(app *fiber.App, provider *providers.Provider) {
 	// User routes
 	user.RegisterRoutes(app.Group("/users"))
 
-	// Connector/Tunnel routes
-	setupConnectorRoutes(app)
-
 	// Testing routes
 	setupTesterRoutes(app)
-}
-
-// setupConnectorRoutes initializes and registers connector routes
-func setupConnectorRoutes(app *fiber.App) {
-	// Initialize store and service
-	store := connectorService.NewMemoryStore()
-	config := connectorService.GenerateTunnelConfig("https://api.syntra.dev")
-	service := connectorService.NewService(store, config)
-
-	// Initialize tunnel manager and reverse proxy
-	tunnelManager := connectorService.NewTunnelManager(store)
-	reverseProxy := connectorService.NewReverseProxy(tunnelManager, "syntra.dev")
-
-	// Create handlers
-	handler := connector.NewHandler(service)
-	wsHandler := connector.NewWebSocketHandler(tunnelManager, reverseProxy)
-
-	// Register routes
-	connectorGroup := app.Group("/tunnel")
-	connector.RegisterRoutes(connectorGroup, handler, wsHandler)
 }
 
 // setupTesterRoutes initializes and registers testing routes
