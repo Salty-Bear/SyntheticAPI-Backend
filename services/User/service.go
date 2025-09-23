@@ -9,8 +9,8 @@ import (
 // UserService defines the interface for user management operations
 // This service handles user CRUD operations with Firebase authentication integration
 type UserService interface {
-	// Create creates a new user
-	Create(ctx context.Context, user *sdk.User) error
+	// Create creates a new user or returns existing user if email already exists
+	Create(ctx context.Context, user *sdk.User) (*sdk.User, error)
 
 	// Get retrieves a user by ID
 	Get(ctx context.Context, id string) (*sdk.User, error)

@@ -30,7 +30,7 @@ func Create(c *fiber.Ctx) error {
 	}
 
 	pr := providers.GetProviders(c)
-	err := pr.S.User.Create(c.Context(), payload)
+	createdUser, err := pr.S.User.Create(c.Context(), payload)
 	if err != nil {
 		message := fmt.Sprintf("failed to create user. %v", err)
 		log.Errorw("failed to create user", "error", err)
@@ -44,7 +44,7 @@ func Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(sdk.UserResponse{
 		Success: true,
 		Message: "User created successfully",
-		Data:    payload,
+		Data:    createdUser,
 	})
 }
 
