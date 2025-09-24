@@ -81,3 +81,29 @@ func Stats(c *fiber.Ctx) error {
 	log.Debug("stats retrieved successfully")
 	return nil
 }
+
+// SendTunnelRequest sends an HTTP request through a tunnel to a connected CLI client
+func SendTunnelRequest(c *fiber.Ctx) error {
+	log.Debug("received tunnel request")
+	pr := providers.GetProviders(c)
+	err := pr.S.PubSub.SendTunnelRequest(c.Context(), c)
+	if err != nil {
+		log.Errorw("failed to send tunnel request", "error", err)
+		return err
+	}
+	log.Debug("tunnel request sent successfully")
+	return nil
+}
+
+// ListTunnels returns all connected tunnel clients
+func ListTunnels(c *fiber.Ctx) error {
+	log.Debug("received list tunnels request")
+	pr := providers.GetProviders(c)
+	err := pr.S.PubSub.ListTunnels(c.Context(), c)
+	if err != nil {
+		log.Errorw("failed to list tunnels", "error", err)
+		return err
+	}
+	log.Debug("tunnels listed successfully")
+	return nil
+}

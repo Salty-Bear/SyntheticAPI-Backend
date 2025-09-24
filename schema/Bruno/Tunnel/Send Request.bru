@@ -1,0 +1,62 @@
+meta {
+  name: Send HTTP Request Through Tunnel
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/pubsub/v1/tunnel/client1/request
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "method": "GET",
+    "path": "api/users",
+    "body": "",
+    "headers": {
+      "Accept": "application/json"
+    }
+  }
+}
+
+docs {
+  # Send HTTP Request Through Tunnel
+  
+  This endpoint sends an HTTP request through a tunnel to a connected CLI client.
+  
+  ## URL Parameters
+  
+  - `client_id`: The ID of the connected tunnel client (e.g., "client1")
+  
+  ## Request Body
+  
+  ```json
+  {
+    "method": "GET|POST|PUT|DELETE|PATCH",
+    "path": "api/endpoint",
+    "body": "request body as string",
+    "headers": {
+      "Header-Name": "header-value"
+    }
+  }
+  ```
+  
+  ## Response
+  
+  ```json
+  {
+    "status": "sent",
+    "request_id": "req_1695484800123456789",
+    "client_id": "client1",
+    "message": "Request sent to tunnel client"
+  }
+  ```
+  
+  The request will be forwarded to the CLI client's localhost application.
+}
