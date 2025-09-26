@@ -14,6 +14,9 @@ func RegisterRoutes(router fiber.Router) {
 	// Get All users
 	v1.Get("/", List)
 
+	// Get User by email
+	v1.Get("/email/:email", GetByEmail)
+
 	// Get User by ID
 	v1.Get("/:id", Get)
 
