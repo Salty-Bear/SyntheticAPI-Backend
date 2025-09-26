@@ -1,39 +1,19 @@
 meta {
-  name: List Connected Tunnels
+  name: List Tunnels
   type: http
-  seq: 1
+  seq: 2
 }
 
 get {
-  url: {{base_url}}/pubsub/v1/tunnels
+  url: {{baseUrl}}/tunnels/v1/?project_id=project-123&enabled=true&protocol=http&page=1&limit=10
   body: none
-  auth: none
+  auth: inherit
 }
 
-headers {
-  Content-Type: application/json
-}
-
-docs {
-  # List Connected Tunnels
-  
-  This endpoint returns all currently connected tunnel clients.
-  
-  ## Response
-  
-  Returns a JSON object with an array of connected tunnel clients:
-  
-  ```json
-  {
-    "tunnels": [
-      {
-        "client_id": "client1",
-        "connected": true,
-        "last_active": "2023-09-23T20:00:00Z"
-      }
-    ]
-  }
-  ```
-  
-  Use this to check which CLI clients are available for sending requests.
+params:query {
+  project_id: project-123
+  enabled: true
+  protocol: http
+  page: 1
+  limit: 10
 }

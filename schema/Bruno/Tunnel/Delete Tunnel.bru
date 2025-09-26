@@ -1,0 +1,15 @@
+meta {
+  name: Delete Tunnel
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/tunnels/v1/12345678-1234-5678-9abc-def123456789
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  tunnelId: tunnel-123
+}

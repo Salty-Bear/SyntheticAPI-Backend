@@ -1,0 +1,22 @@
+meta {
+  name: Create Tunnel
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/tunnels/v1/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "My Tunnel",
+    "description": "Development tunnel for local testing",
+    "endpoint": "localhost",
+    "port": 3000,
+    "protocol": "http",
+    "project_id": "project-123"
+  }
+}
