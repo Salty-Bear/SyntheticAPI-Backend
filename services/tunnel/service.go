@@ -9,7 +9,7 @@ import (
 // TunnelService defines the interface for tunnel management operations
 // This service handles tunnel CRUD operations with validation and business logic
 type TunnelService interface {
-	// Create creates a new tunnel or returns existing tunnel if name already exists in project
+	// Create creates a new tunnel or returns existing tunnel if name already exists
 	Create(ctx context.Context, tunnel *sdk.Tunnel) (*sdk.Tunnel, error)
 
 	// Get retrieves a tunnel by ID
@@ -23,7 +23,4 @@ type TunnelService interface {
 
 	// Delete deletes a tunnel by ID
 	Delete(ctx context.Context, id string) error
-
-	// GetByProjectID retrieves all tunnels for a specific project
-	GetByProjectID(ctx context.Context, projectID string) ([]*sdk.Tunnel, error)
 }

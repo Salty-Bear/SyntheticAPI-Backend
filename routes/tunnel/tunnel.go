@@ -72,39 +72,14 @@ func Get(c *fiber.Ctx) error {
 	})
 }
 
-// GetByProjectID retrieves all tunnels for a specific project
-func GetByProjectID(c *fiber.Ctx) error {
-	log.Debug("received get tunnels by project ID request")
-	projectID := c.Params("projectId")
-
-	pr := providers.GetProviders(c)
-	tunnels, err := pr.S.Tunnel.GetByProjectID(c.Context(), projectID)
-	if err != nil {
-		message := fmt.Sprintf("failed to get tunnels by project ID. %v", err)
-		log.Errorw("failed to get tunnels by project ID", "error", err)
-		return c.Status(http.StatusInternalServerError).JSON(sdk.TunnelResponse{
-			Success: false,
-			Message: message,
-		})
-	}
-
-	log.Debug("tunnels retrieved by project ID successfully")
-	return c.JSON(sdk.TunnelResponse{
-		Success: true,
-		Message: "Tunnels retrieved successfully",
-		Tunnels: tunnels,
-	})
-}
-
 // List retrieves all tunnels with optional filtering and pagination
 func List(c *fiber.Ctx) error {
 	log.Debug("received list tunnels request")
 
 	// Parse query parameters
 	query := &sdk.TunnelQuery{
-		ProjectID: c.Query("project_id"),
-		Status:    c.Query("status"),
-		Protocol:  c.Query("protocol"),
+		Status:   c.Query("status"),
+		Protocol: c.Query("protocol"),
 	}
 
 	// Parse enabled parameter

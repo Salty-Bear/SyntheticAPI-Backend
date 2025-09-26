@@ -14,9 +14,6 @@ func RegisterRoutes(router fiber.Router) {
 	// Get All tunnels
 	v1.Get("/", List)
 
-	// Get tunnels by project ID
-	v1.Get("/project/:projectId", GetByProjectID)
-
 	// Get tunnel by ID
 	v1.Get("/:id", Get)
 

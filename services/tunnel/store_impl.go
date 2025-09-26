@@ -51,13 +51,9 @@ func (s *StoreImpl) GetTunnelByID(ctx context.Context, tunnelID string) (*models
 }
 
 // GetTunnels retrieves all tunnels with optional filtering
-func (s *StoreImpl) GetTunnels(ctx context.Context, projectID, status, protocol string, enabled *bool) ([]*models.Tunnel, error) {
+func (s *StoreImpl) GetTunnels(ctx context.Context, status, protocol string, enabled *bool) ([]*models.Tunnel, error) {
 	filter := bson.M{}
 	md := models.GetTunnelModel()
-
-	if projectID != "" {
-		filter[md.ProjectIdKey] = projectID
-	}
 
 	if status != "" {
 		filter[md.StatusKey] = status
@@ -148,12 +144,11 @@ func (s *StoreImpl) TunnelExists(ctx context.Context, tunnelID string) (bool, er
 	return true, nil
 }
 
-// NameExists checks if a tunnel exists by name within a project in MongoDB
-func (s *StoreImpl) NameExists(ctx context.Context, projectID, name string) (bool, error) {
+// NameExists checks if a tunnel exists by name in MongoDB
+func (s *StoreImpl) NameExists(ctx context.Context, name string) (bool, error) {
 	md := models.GetTunnelModel()
 	filter := bson.M{
-		md.ProjectIdKey: projectID,
-		md.NameKey:      name,
+		md.NameKey: name,
 	}
 
 	result := s.db.FindOne(ctx, md, filter)

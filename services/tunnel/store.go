@@ -16,7 +16,7 @@ type TunnelStore interface {
 	GetTunnelByID(ctx context.Context, tunnelID string) (*models.Tunnel, error)
 
 	// GetTunnels retrieves all tunnels with optional filtering
-	GetTunnels(ctx context.Context, projectID, status, protocol string, enabled *bool) ([]*models.Tunnel, error)
+	GetTunnels(ctx context.Context, status, protocol string, enabled *bool) ([]*models.Tunnel, error)
 
 	// UpdateTunnel updates an existing tunnel
 	UpdateTunnel(ctx context.Context, tunnelID string, updates map[string]interface{}) error
@@ -27,6 +27,6 @@ type TunnelStore interface {
 	// TunnelExists checks if a tunnel exists by ID
 	TunnelExists(ctx context.Context, tunnelID string) (bool, error)
 
-	// NameExists checks if a tunnel exists by name within a project
-	NameExists(ctx context.Context, projectID, name string) (bool, error)
+	// NameExists checks if a tunnel exists by name
+	NameExists(ctx context.Context, name string) (bool, error)
 }

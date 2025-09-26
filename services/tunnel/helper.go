@@ -9,7 +9,6 @@ import (
 func fromSdkToModel(tunnel sdk.Tunnel) models.Tunnel {
 	return models.Tunnel{
 		Id:          tunnel.ID,
-		ProjectId:   tunnel.ProjectID,
 		Name:        tunnel.Name,
 		Description: tunnel.Description,
 		Endpoint:    tunnel.Endpoint,
@@ -28,7 +27,6 @@ func fromModelToSdk(tunnel *models.Tunnel) *sdk.Tunnel {
 
 	return &sdk.Tunnel{
 		ID:          tunnel.Id,
-		ProjectID:   tunnel.ProjectId,
 		Name:        tunnel.Name,
 		Description: tunnel.Description,
 		Endpoint:    tunnel.Endpoint,

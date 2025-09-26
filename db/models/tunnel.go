@@ -4,7 +4,6 @@ package models
 // Tunnels provide secure network connections and endpoint management.
 type Tunnel struct {
 	Id          string `bson:"id"`          // Unique identifier for the tunnel (UUID)
-	ProjectId   string `bson:"project_id"`  // Project ID this tunnel belongs to
 	Name        string `bson:"name"`        // Display name of the tunnel
 	Description string `bson:"description"` // Description of the tunnel purpose
 	Endpoint    string `bson:"endpoint"`    // Target endpoint for the tunnel
@@ -18,7 +17,6 @@ type Tunnel struct {
 // It provides database collection name and field key mappings for MongoDB operations.
 type TunnelModel struct {
 	IdKey          string // BSON field key for tunnel ID
-	ProjectIdKey   string // BSON field key for project ID
 	NameKey        string // BSON field key for tunnel name
 	DescriptionKey string // BSON field key for tunnel description
 	EndpointKey    string // BSON field key for tunnel endpoint
@@ -47,7 +45,6 @@ func (t TunnelModel) DbName() string {
 func GetTunnelModel() TunnelModel {
 	return TunnelModel{
 		IdKey:          "id",
-		ProjectIdKey:   "project_id",
 		NameKey:        "name",
 		DescriptionKey: "description",
 		EndpointKey:    "endpoint",

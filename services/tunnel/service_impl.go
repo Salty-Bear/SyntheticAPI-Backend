@@ -20,20 +20,20 @@ func NewService(store TunnelStore) TunnelService {
 	}
 }
 
-// Create creates a new tunnel or returns existing tunnel if name already exists in project
+// Create creates a new tunnel or returns existing tunnel if name already exists
 func (s *ServiceImpl) Create(ctx context.Context, tunnel *sdk.Tunnel) (*sdk.Tunnel, error) {
 	// Generate ID if not provided
 	if tunnel.ID == "" {
 		tunnel.ID = uuid.New().String()
 	}
 
-	// Check if tunnel with name already exists in the project
-	exists, err := s.store.NameExists(ctx, tunnel.ProjectID, tunnel.Name)
+	// Check if tunnel with name already exists
+	exists, err := s.store.NameExists(ctx, tunnel.Name)
 	if err != nil {
 		return nil, fmt.Errorf("error checking tunnel name existence: %w", err)
 	}
 	if exists {
-		return nil, fmt.Errorf("tunnel with name '%s' already exists in project '%s'", tunnel.Name, tunnel.ProjectID)
+		return nil, fmt.Errorf("tunnel with name '%s' already exists", tunnel.Name)
 	}
 
 	// Set default values
@@ -78,20 +78,18 @@ func (s *ServiceImpl) Get(ctx context.Context, id string) (*sdk.Tunnel, error) {
 // List retrieves all tunnels with optional filtering and pagination
 func (s *ServiceImpl) List(ctx context.Context, query *sdk.TunnelQuery) ([]*sdk.Tunnel, error) {
 	var (
-		projectID string
-		status    string
-		protocol  string
-		enabled   *bool
+		status   string
+		protocol string
+		enabled  *bool
 	)
 
 	if query != nil {
-		projectID = query.ProjectID
 		status = query.Status
 		protocol = query.Protocol
 		enabled = query.Enabled
 	}
 
-	tunnels, err := s.store.GetTunnels(ctx, projectID, status, protocol, enabled)
+	tunnels, err := s.store.GetTunnels(ctx, status, protocol, enabled)
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving tunnels: %w", err)
 	}
@@ -194,17 +192,4 @@ func (s *ServiceImpl) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
-}
-
-// GetByProjectID retrieves all tunnels for a specific project
-func (s *ServiceImpl) GetByProjectID(ctx context.Context, projectID string) ([]*sdk.Tunnel, error) {
-	if projectID == "" {
-		return nil, fmt.Errorf("project ID is required")
-	}
-
-	query := &sdk.TunnelQuery{
-		ProjectID: projectID,
-	}
-
-	return s.List(ctx, query)
 }

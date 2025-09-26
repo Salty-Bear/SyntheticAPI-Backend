@@ -3,7 +3,6 @@ package sdk
 // Tunnel represents a tunnel entity for service layer operations
 type Tunnel struct {
 	ID          string `json:"id"`
-	ProjectID   string `json:"project_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Endpoint    string `json:"endpoint"`
@@ -22,7 +21,6 @@ type CreateTunnelRequest struct {
 	Endpoint    string `json:"endpoint" validate:"required"`
 	Port        int    `json:"port" validate:"required,min=1,max=65535"`
 	Protocol    string `json:"protocol" validate:"required,oneof=http https tcp udp"`
-	ProjectID   string `json:"project_id" validate:"required"`
 }
 
 // UpdateTunnelRequest represents the request body for updating a tunnel
@@ -46,13 +44,12 @@ type TunnelResponse struct {
 
 // TunnelQuery represents query parameters for filtering tunnels
 type TunnelQuery struct {
-	ProjectID string `json:"project_id"`
-	Status    string `json:"status"`
-	Protocol  string `json:"protocol"`
-	Enabled   *bool  `json:"enabled"`
-	Page      int    `json:"page"`
-	Limit     int    `json:"limit"`
-	Offset    int    `json:"offset"`
+	Status   string `json:"status"`
+	Protocol string `json:"protocol"`
+	Enabled  *bool  `json:"enabled"`
+	Page     int    `json:"page"`
+	Limit    int    `json:"limit"`
+	Offset   int    `json:"offset"`
 }
 
 // TunnelErrorResponse represents error response structure
