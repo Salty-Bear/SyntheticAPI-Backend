@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/Aryaman/syntra/providers"
@@ -65,6 +66,39 @@ func Get(c *fiber.Ctx) error {
 	}
 
 	log.Debug("user retrieved successfully")
+	return c.JSON(sdk.UserResponse{
+		Success: true,
+		Message: "User retrieved successfully",
+		Data:    user,
+	})
+}
+
+// GetByEmail retrieves a user by email
+func GetByEmail(c *fiber.Ctx) error {
+	log.Debug("received get user by email request")
+	encodedEmail := c.Params("email")
+
+	// Decode the URL-encoded email parameter
+	email, err := url.QueryUnescape(encodedEmail)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(sdk.UserResponse{
+			Success: false,
+			Message: fmt.Sprintf("invalid email parameter: %v", err),
+		})
+	}
+
+	pr := providers.GetProviders(c)
+	user, err := pr.S.User.GetByEmail(c.Context(), email)
+	if err != nil {
+		message := fmt.Sprintf("failed to get user by email. %v", err)
+		log.Errorw("failed to get user by email", "error", err)
+		return c.Status(http.StatusInternalServerError).JSON(sdk.UserResponse{
+			Success: false,
+			Message: message,
+		})
+	}
+
+	log.Debug("user retrieved by email successfully")
 	return c.JSON(sdk.UserResponse{
 		Success: true,
 		Message: "User retrieved successfully",

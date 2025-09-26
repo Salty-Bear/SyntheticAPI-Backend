@@ -15,6 +15,9 @@ type UserService interface {
 	// Get retrieves a user by ID
 	Get(ctx context.Context, id string) (*sdk.User, error)
 
+	// GetByEmail retrieves a user by email
+	GetByEmail(ctx context.Context, email string) (*sdk.User, error)
+
 	// List retrieves all users with optional filtering and pagination
 	List(ctx context.Context, query *sdk.UserQuery) ([]*sdk.User, error)
 
