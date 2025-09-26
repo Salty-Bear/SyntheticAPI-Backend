@@ -77,6 +77,25 @@ func (s *ServiceImpl) Get(ctx context.Context, id string) (*sdk.User, error) {
 	return fromModelToSdk(user), nil
 }
 
+// GetByEmail retrieves a user by email
+func (s *ServiceImpl) GetByEmail(ctx context.Context, email string) (*sdk.User, error) {
+	if email == "" {
+		return nil, fmt.Errorf("user email is required")
+	}
+
+	user, err := s.store.GetUserByEmail(ctx, email)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving user: %w", err)
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	// Convert database model to SDK type
+	return fromModelToSdk(user), nil
+}
+
 // List retrieves all users with optional filtering and pagination
 func (s *ServiceImpl) List(ctx context.Context, query *sdk.UserQuery) ([]*sdk.User, error) {
 	var enabled *bool
