@@ -4,6 +4,7 @@ import (
 	"github.com/Aryaman/syntra/providers"
 	"github.com/Aryaman/syntra/routes/pubsub"
 	"github.com/Aryaman/syntra/routes/tester"
+	"github.com/Aryaman/syntra/routes/tunnel"
 	"github.com/Aryaman/syntra/routes/user"
 	testerService "github.com/Aryaman/syntra/services/tester"
 	"github.com/gofiber/fiber/v2"
@@ -16,6 +17,9 @@ func RegisterRoutes(app *fiber.App, provider *providers.Provider) {
 
 	// User routes
 	user.RegisterRoutes(app.Group("/users"))
+
+	// Tunnel routes
+	tunnel.RegisterRoutes(app.Group("/tunnels"))
 
 	// Testing routes
 	setupTesterRoutes(app)

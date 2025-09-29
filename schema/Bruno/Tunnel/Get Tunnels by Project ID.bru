@@ -1,0 +1,15 @@
+meta {
+  name: Get Tunnels by Project ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/tunnels/v1/project/project-123
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  projectId: project-123
+}

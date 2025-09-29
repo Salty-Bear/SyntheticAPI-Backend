@@ -1,0 +1,27 @@
+meta {
+  name: Update Tunnel
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/tunnels/v1/12345678-1234-5678-9abc-def123456789
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Updated Tunnel Name",
+    "description": "Updated description for the tunnel",
+    "endpoint": "api.example.com",
+    "port": 8080,
+    "protocol": "https",
+    "status": "active",
+    "enabled": true
+  }
+}
+
+vars:pre-request {
+  tunnelId: tunnel-123
+}
