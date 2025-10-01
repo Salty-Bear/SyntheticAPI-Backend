@@ -1,0 +1,19 @@
+meta {
+  name: Delete Generate Task
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/generate/v1/12345678-1234-5678-9abc-def123456789?user_id=user-123
+  body: none
+  auth: inherit
+}
+
+params:query {
+  user_id: user-123
+}
+
+vars:pre-request {
+  generateId: generate-123
+}

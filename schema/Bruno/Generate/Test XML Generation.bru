@@ -1,0 +1,33 @@
+meta {
+  name: Test XML Generation
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/generate/v1/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "XML Test Generator",
+    "description": "Generate XML data for API testing",
+    "data_type": "xml",
+    "count": 25,
+    "schema": {
+      "root": "users",
+      "element": "user",
+      "attributes": {
+        "id": "integer",
+        "name": "string",
+        "email": "email",
+        "created_at": "datetime"
+      }
+    },
+    "format": "pretty_xml",
+    "enabled": true,
+    "user_id": "user-123"
+  }
+}

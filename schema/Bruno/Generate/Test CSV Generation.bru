@@ -1,0 +1,26 @@
+meta {
+  name: Test CSV Generation
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/generate/v1/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "CSV Test Generator",
+    "description": "Generate CSV data for testing export functionality",
+    "data_type": "csv",
+    "count": 50,
+    "schema": {
+      "columns": ["id", "name", "email", "department", "salary"]
+    },
+    "format": "standard_csv",
+    "enabled": true,
+    "user_id": "user-123"
+  }
+}
