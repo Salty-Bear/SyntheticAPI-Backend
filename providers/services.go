@@ -4,14 +4,16 @@ import (
 	"github.com/Aryaman/syntra/config"
 	"github.com/Aryaman/syntra/db"
 	user "github.com/Aryaman/syntra/services/User"
+	"github.com/Aryaman/syntra/services/generate"
 	"github.com/Aryaman/syntra/services/pubsub"
 	"github.com/Aryaman/syntra/services/tunnel"
 )
 
 type Service struct {
-	PubSub pubsub.PubSub
-	User   user.UserService
-	Tunnel tunnel.TunnelService
+	PubSub   pubsub.PubSub
+	User     user.UserService
+	Tunnel   tunnel.TunnelService
+	Generate generate.GenerateService
 }
 
 func NewServicesWithConfig(cnf config.AppConfig, database db.DB) *Service {
@@ -25,10 +27,15 @@ func NewServicesWithConfig(cnf config.AppConfig, database db.DB) *Service {
 	tunnelStore := tunnel.NewStore(database)
 	tunnelSvc := tunnel.NewService(tunnelStore)
 
+	// Create generate store and service
+	generateStore := generate.NewStore(database)
+	generateSvc := generate.NewService(generateStore)
+
 	return &Service{
-		PubSub: pubsubSvc,
-		User:   userSvc,
-		Tunnel: tunnelSvc,
+		PubSub:   pubsubSvc,
+		User:     userSvc,
+		Tunnel:   tunnelSvc,
+		Generate: generateSvc,
 	}
 }
 

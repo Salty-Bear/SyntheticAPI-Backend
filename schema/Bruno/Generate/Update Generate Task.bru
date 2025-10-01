@@ -1,0 +1,38 @@
+meta {
+  name: Update Generate Task
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/generate/v1/12345678-1234-5678-9abc-def123456789
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Updated Data Generator",
+    "description": "Updated description for synthetic data generation",
+    "data_type": "csv",
+    "count": 500,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "email": {"type": "string"},
+        "phone": {"type": "string"},
+        "address": {"type": "string"}
+      }
+    },
+    "format": "compact",
+    "status": "active",
+    "enabled": true,
+    "user_id": "user-123"
+  }
+}
+
+vars:pre-request {
+  generateId: generate-123
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Execute Generate Task
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/generate/v1/12345678-1234-5678-9abc-def123456789/execute
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "user_id": "user-123"
+  }
+}
+
+vars:pre-request {
+  generateId: generate-123
+}
