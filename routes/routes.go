@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/Aryaman/syntra/providers"
+	"github.com/Aryaman/syntra/routes/generate"
 	"github.com/Aryaman/syntra/routes/pubsub"
 	"github.com/Aryaman/syntra/routes/tester"
 	"github.com/Aryaman/syntra/routes/tunnel"
@@ -20,6 +21,9 @@ func RegisterRoutes(app *fiber.App, provider *providers.Provider) {
 
 	// Tunnel routes
 	tunnel.RegisterRoutes(app.Group("/tunnels"))
+
+	// Generate routes
+	generate.RegisterRoutes(app.Group("/generate"))
 
 	// Testing routes
 	setupTesterRoutes(app)

@@ -1,0 +1,20 @@
+meta {
+  name: List Generate Tasks
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/generate/v1/?user_id=user-123&status=pending&data_type=json&enabled=true&page=1&limit=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  user_id: user-123
+  status: pending
+  data_type: json
+  enabled: true
+  page: 1
+  limit: 10
+}

@@ -1,0 +1,32 @@
+meta {
+  name: Create Generate Task
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/generate/v1/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "User Data Generator",
+    "description": "Generate synthetic user data for testing",
+    "data_type": "json",
+    "count": 100,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "email": {"type": "string"},
+        "age": {"type": "integer", "minimum": 18, "maximum": 80}
+      }
+    },
+    "format": "pretty",
+    "enabled": true,
+    "user_id": "user-123"
+  }
+}

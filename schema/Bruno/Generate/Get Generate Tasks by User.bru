@@ -1,0 +1,19 @@
+meta {
+  name: Get Generate Tasks by User
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/generate/v1/?user_id=user-123
+  body: none
+  auth: inherit
+}
+
+params:query {
+  user_id: user-123
+}
+
+vars:pre-request {
+  userId: user-123
+}
