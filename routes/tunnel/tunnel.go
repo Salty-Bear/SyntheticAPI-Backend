@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Aryaman/syntra/middlewares"
 	"github.com/Aryaman/syntra/providers"
 	"github.com/Aryaman/syntra/sdk"
 	"github.com/gofiber/fiber/v2"
@@ -15,6 +16,16 @@ import (
 // Create creates a new tunnel
 func Create(c *fiber.Ctx) error {
 	log.Debug("received create tunnel request")
+
+	// Get user ID from context
+	userID := middlewares.GetUserIDFromContext(c)
+	if userID == "" {
+		return c.Status(http.StatusUnauthorized).JSON(sdk.TunnelResponse{
+			Success: false,
+			Message: "user authentication required",
+		})
+	}
+
 	payload := new(sdk.Tunnel)
 	if err := c.BodyParser(payload); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(sdk.TunnelResponse{
@@ -28,6 +39,10 @@ func Create(c *fiber.Ctx) error {
 	if payload.ID == "" {
 		payload.ID = uuid.New().String()
 	}
+
+	// Set user ID from context
+	payload.CreatedBy = userID
+	payload.UpdatedBy = userID
 
 	pr := providers.GetProviders(c)
 	createdTunnel, err := pr.S.Tunnel.Create(c.Context(), payload)
