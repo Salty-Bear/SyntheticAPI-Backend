@@ -1,12 +1,16 @@
 package tunnel
 
 import (
+	"github.com/Aryaman/syntra/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
 
 // RegisterRoutes registers tunnel management routes
 func RegisterRoutes(router fiber.Router) {
 	v1 := router.Group("/v1")
+
+	// Apply auth middleware to all tunnel routes
+	v1.Use(middlewares.RequireAuth())
 
 	// Create tunnel
 	v1.Post("/", Create)

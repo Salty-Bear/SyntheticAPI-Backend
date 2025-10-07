@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Aryaman/syntra/middlewares"
 	"github.com/Aryaman/syntra/providers"
 	"github.com/Aryaman/syntra/sdk"
 	"github.com/gofiber/fiber/v2"
@@ -15,6 +16,16 @@ import (
 // Create creates a new generate task
 func Create(c *fiber.Ctx) error {
 	log.Debug("received create generate task request")
+
+	// Get user ID from context
+	userID := middlewares.GetUserIDFromContext(c)
+	if userID == "" {
+		return c.Status(http.StatusUnauthorized).JSON(sdk.GenerateResponse{
+			Success: false,
+			Message: "user authentication required",
+		})
+	}
+
 	payload := new(sdk.Generate)
 	if err := c.BodyParser(payload); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(sdk.GenerateResponse{
@@ -29,13 +40,10 @@ func Create(c *fiber.Ctx) error {
 		payload.ID = uuid.New().String()
 	}
 
-	// Validate required fields
-	if payload.UserId == "" {
-		return c.Status(http.StatusBadRequest).JSON(sdk.GenerateResponse{
-			Success: false,
-			Message: "user_id is required",
-		})
-	}
+	// Set user ID from context
+	payload.UserId = userID
+	payload.CreatedBy = userID
+	payload.UpdatedBy = userID
 
 	pr := providers.GetProviders(c)
 	createdGenerate, err := pr.S.Generate.Create(c.Context(), payload)
@@ -59,16 +67,18 @@ func Create(c *fiber.Ctx) error {
 // Get retrieves a generate task by ID
 func Get(c *fiber.Ctx) error {
 	log.Debug("received get generate task request")
-	generateID := c.Params("id")
-	userId := c.Query("user_id")
 
-	// Validate required parameters
-	if userId == "" {
-		return c.Status(http.StatusBadRequest).JSON(sdk.GenerateResponse{
+	// Get user ID from context
+	userID := middlewares.GetUserIDFromContext(c)
+	if userID == "" {
+		return c.Status(http.StatusUnauthorized).JSON(sdk.GenerateResponse{
 			Success: false,
-			Message: "user_id query parameter is required",
+			Message: "user authentication required",
 		})
 	}
+
+	generateID := c.Params("id")
+	userId := userID
 
 	pr := providers.GetProviders(c)
 	generate, err := pr.S.Generate.Get(c.Context(), generateID, userId)
@@ -93,14 +103,16 @@ func Get(c *fiber.Ctx) error {
 func List(c *fiber.Ctx) error {
 	log.Debug("received list generate tasks request")
 
-	// Validate required parameters
-	userId := c.Query("user_id")
-	if userId == "" {
-		return c.Status(http.StatusBadRequest).JSON(sdk.GenerateResponse{
+	// Get user ID from context
+	userID := middlewares.GetUserIDFromContext(c)
+	if userID == "" {
+		return c.Status(http.StatusUnauthorized).JSON(sdk.GenerateResponse{
 			Success: false,
-			Message: "user_id query parameter is required",
+			Message: "user authentication required",
 		})
 	}
+
+	userId := userID
 
 	// Parse query parameters
 	query := &sdk.GenerateQuery{
@@ -172,6 +184,16 @@ func List(c *fiber.Ctx) error {
 // Update updates an existing generate task
 func Update(c *fiber.Ctx) error {
 	log.Debug("received update generate task request")
+
+	// Get user ID from context
+	userID := middlewares.GetUserIDFromContext(c)
+	if userID == "" {
+		return c.Status(http.StatusUnauthorized).JSON(sdk.GenerateResponse{
+			Success: false,
+			Message: "user authentication required",
+		})
+	}
+
 	generateID := c.Params("id")
 
 	payload := new(sdk.Generate)
@@ -183,15 +205,9 @@ func Update(c *fiber.Ctx) error {
 	}
 	log.Debug("parsed update generate task request")
 
-	// Validate required fields
-	if payload.UserId == "" {
-		return c.Status(http.StatusBadRequest).JSON(sdk.GenerateResponse{
-			Success: false,
-			Message: "user_id is required",
-		})
-	}
-
-	// Set the generate task ID from the URL parameter
+	// Set user ID and generate task ID
+	payload.UserId = userID
+	payload.UpdatedBy = userID
 	payload.ID = generateID
 
 	pr := providers.GetProviders(c)
@@ -216,16 +232,18 @@ func Update(c *fiber.Ctx) error {
 // Delete deletes a generate task by ID
 func Delete(c *fiber.Ctx) error {
 	log.Debug("received delete generate task request")
-	generateID := c.Params("id")
-	userId := c.Query("user_id")
 
-	// Validate required parameters
-	if userId == "" {
-		return c.Status(http.StatusBadRequest).JSON(sdk.GenerateResponse{
+	// Get user ID from context
+	userID := middlewares.GetUserIDFromContext(c)
+	if userID == "" {
+		return c.Status(http.StatusUnauthorized).JSON(sdk.GenerateResponse{
 			Success: false,
-			Message: "user_id query parameter is required",
+			Message: "user authentication required",
 		})
 	}
+
+	generateID := c.Params("id")
+	userId := userID
 
 	pr := providers.GetProviders(c)
 	err := pr.S.Generate.Delete(c.Context(), generateID, userId)
@@ -248,27 +266,20 @@ func Delete(c *fiber.Ctx) error {
 // Execute executes a generate task to produce synthetic data
 func Execute(c *fiber.Ctx) error {
 	log.Debug("received execute generate task request")
+
+	// Get user ID from context
+	userID := middlewares.GetUserIDFromContext(c)
+	if userID == "" {
+		return c.Status(http.StatusUnauthorized).JSON(sdk.GenerateResponse{
+			Success: false,
+			Message: "user authentication required",
+		})
+	}
+
 	generateID := c.Params("id")
 
-	// Parse request body for user_id
-	var request sdk.ExecuteGenerateRequest
-	if err := c.BodyParser(&request); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(sdk.GenerateResponse{
-			Success: false,
-			Message: fmt.Sprintf("invalid request. %v", err),
-		})
-	}
-
-	// Validate required fields
-	if request.UserId == "" {
-		return c.Status(http.StatusBadRequest).JSON(sdk.GenerateResponse{
-			Success: false,
-			Message: "user_id is required",
-		})
-	}
-
 	pr := providers.GetProviders(c)
-	executedGenerate, err := pr.S.Generate.Execute(c.Context(), generateID, request.UserId)
+	executedGenerate, err := pr.S.Generate.Execute(c.Context(), generateID, userID)
 	if err != nil {
 		message := fmt.Sprintf("failed to execute generate task. %v", err)
 		log.Errorw("failed to execute generate task", "error", err)
