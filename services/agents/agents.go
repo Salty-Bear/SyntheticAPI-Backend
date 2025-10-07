@@ -27,17 +27,7 @@ func (a *SyntheticDataAgent) Name() string {
 }
 
 func (a *SyntheticDataAgent) Execute(ctx context.Context, input *sdk.AgentInput) (*sdk.AgentOutput, error) {
-	log.Infof("[%s] Starting execution for %d records", a.Name(), input.Count)
-
-	// Build the prompt for synthetic data generation
-	systemPrompt := `You are an expert synthetic data generator. Your task is to generate realistic, high-quality synthetic data that matches the provided schema and requirements.
-
-Rules:
-1. Generate data that strictly adheres to the provided schema structure
-2. Ensure data is realistic and diverse
-3. Follow any specific instructions in the user prompt
-4. Return ONLY valid JSON without any additional text or explanations
-5. Generate exactly the number of records requested`
+	log.Infof(LogMessages.AgentStarting, a.Name(), input.Count)
 
 	// Prepare schema string
 	schemaStr := "No specific schema provided. Generate generic data."
@@ -48,16 +38,7 @@ Rules:
 		}
 	}
 
-	userPrompt := fmt.Sprintf(`Generate %d synthetic data records with the following requirements:
-
-Prompt: %s
-
-Schema: %s
-
-Data Type: %s
-Format: %s
-
-Return the data as a JSON array of objects. Each object should match the schema structure.`,
+	userPrompt := fmt.Sprintf(UserPromptTemplates.SyntheticData,
 		input.Count,
 		input.Prompt,
 		schemaStr,
@@ -66,25 +47,25 @@ Return the data as a JSON array of objects. Each object should match the schema 
 	)
 
 	messages := []sdk.LLMMessage{
-		{Role: "system", Content: systemPrompt},
+		{Role: "system", Content: SystemPrompts.SyntheticDataAgent},
 		{Role: "user", Content: userPrompt},
 	}
 
 	// Call LLM with JSON mode
 	response, err := a.llmService.ChatWithJSON(ctx, messages)
 	if err != nil {
-		log.Errorf("[%s] LLM call failed: %v", a.Name(), err)
-		return nil, fmt.Errorf("failed to generate synthetic data: %w", err)
+		log.Errorf(LogMessages.LLMCallFailed, a.Name(), err)
+		return nil, fmt.Errorf("%s: %w", ErrorMessages.GenerationFailed, err)
 	}
 
 	// Parse the JSON response
 	var generatedData interface{}
 	if err := json.Unmarshal([]byte(response), &generatedData); err != nil {
-		log.Errorf("[%s] Failed to parse response: %v", a.Name(), err)
-		return nil, fmt.Errorf("failed to parse generated data: %w", err)
+		log.Errorf(LogMessages.ParseResponseFailed, a.Name(), err)
+		return nil, fmt.Errorf("%s: %w", ErrorMessages.ParseFailed, err)
 	}
 
-	log.Infof("[%s] Successfully generated synthetic data", a.Name())
+	log.Infof(LogMessages.AgentCompleted, a.Name(), "synthetic data")
 
 	return &sdk.AgentOutput{
 		Data: generatedData,
@@ -112,18 +93,7 @@ func (a *EdgeCaseAgent) Name() string {
 }
 
 func (a *EdgeCaseAgent) Execute(ctx context.Context, input *sdk.AgentInput) (*sdk.AgentOutput, error) {
-	log.Infof("[%s] Starting edge case analysis and generation", a.Name())
-
-	// Build the prompt for edge case generation
-	systemPrompt := `You are an expert at identifying and generating edge case scenarios. Your task is to analyze the provided schema and generate comprehensive edge case test data that covers all boundary conditions, unusual inputs, and potential error scenarios.
-
-Rules:
-1. Identify ALL possible edge cases for the given schema
-2. Generate data that tests boundaries (min/max values, empty strings, nulls, special characters, etc.)
-3. Include corner cases that might break typical validations
-4. Cover different data type edge cases (very long strings, negative numbers, special dates, etc.)
-5. Return ONLY valid JSON without any additional text or explanations
-6. Structure your response to include both the edge case scenarios and the generated data`
+	log.Infof(LogMessages.AgentStarting, a.Name(), 0)
 
 	// Prepare schema string
 	schemaStr := "No specific schema provided."
@@ -143,38 +113,7 @@ Rules:
 		}
 	}
 
-	userPrompt := fmt.Sprintf(`Analyze the schema and generate comprehensive edge case test data:
-
-Original Prompt: %s
-
-Schema: %s
-
-Data Type: %s
-Format: %s
-
-Previously Generated Data (for context): %s
-
-Generate a JSON response with the following structure:
-{
-  "edge_cases_identified": [
-    {
-      "category": "category name",
-      "description": "what edge case this tests",
-      "scenarios": ["scenario 1", "scenario 2"]
-    }
-  ],
-  "edge_case_data": [
-    // Array of objects matching the schema but with edge case values
-  ]
-}
-
-Generate at least 15-20 edge case records covering various scenarios like:
-- Boundary values (min/max)
-- Empty or null values
-- Special characters and encoding
-- Extremely long/short values
-- Invalid but parseable data
-- Unusual but valid combinations`,
+	userPrompt := fmt.Sprintf(UserPromptTemplates.EdgeCase,
 		input.Prompt,
 		schemaStr,
 		input.DataType,
@@ -183,25 +122,25 @@ Generate at least 15-20 edge case records covering various scenarios like:
 	)
 
 	messages := []sdk.LLMMessage{
-		{Role: "system", Content: systemPrompt},
+		{Role: "system", Content: SystemPrompts.EdgeCaseAgent},
 		{Role: "user", Content: userPrompt},
 	}
 
 	// Call LLM with JSON mode
 	response, err := a.llmService.ChatWithJSON(ctx, messages)
 	if err != nil {
-		log.Errorf("[%s] LLM call failed: %v", a.Name(), err)
-		return nil, fmt.Errorf("failed to generate edge cases: %w", err)
+		log.Errorf(LogMessages.LLMCallFailed, a.Name(), err)
+		return nil, fmt.Errorf("%s: %w", ErrorMessages.EdgeCaseGenFailed, err)
 	}
 
 	// Parse the JSON response
 	var edgeCaseResponse interface{}
 	if err := json.Unmarshal([]byte(response), &edgeCaseResponse); err != nil {
-		log.Errorf("[%s] Failed to parse response: %v", a.Name(), err)
-		return nil, fmt.Errorf("failed to parse edge case data: %w", err)
+		log.Errorf(LogMessages.ParseResponseFailed, a.Name(), err)
+		return nil, fmt.Errorf("%s: %w", ErrorMessages.EdgeCaseParseFailed, err)
 	}
 
-	log.Infof("[%s] Successfully generated edge case data", a.Name())
+	log.Infof(LogMessages.AgentCompleted, a.Name(), "edge case data")
 
 	return &sdk.AgentOutput{
 		Data: edgeCaseResponse,

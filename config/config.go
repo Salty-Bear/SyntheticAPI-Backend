@@ -129,14 +129,26 @@ func (a *AppConfig) LoadDatabaseConfig() {
 func (a *AppConfig) LoadLLMConfig() {
 	// load the default values
 	// then load from env variables
+	a.LLM.Provider = "openai"
 	a.LLM.OpenAIAPIKey = ""
+	a.LLM.GeminiAPIKey = ""
 	a.LLM.Model = "gpt-4o-mini"
 	a.LLM.Temperature = 0.7
 	a.LLM.MaxTokens = 4096
 
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	if apiKey != "" {
-		a.LLM.OpenAIAPIKey = apiKey
+	provider := os.Getenv("LLM_PROVIDER")
+	if provider != "" {
+		a.LLM.Provider = provider
+	}
+
+	openaiKey := os.Getenv("OPENAI_API_KEY")
+	if openaiKey != "" {
+		a.LLM.OpenAIAPIKey = openaiKey
+	}
+
+	geminiKey := os.Getenv("GEMINI_API_KEY")
+	if geminiKey != "" {
+		a.LLM.GeminiAPIKey = geminiKey
 	}
 
 	model := os.Getenv("LLM_MODEL")

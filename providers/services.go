@@ -30,7 +30,7 @@ func NewServicesWithConfig(cnf config.AppConfig, database db.DB) *Service {
 	tunnelSvc := tunnel.NewService(tunnelStore)
 
 	// Create LLM service
-	llmSvc, err := llm.NewLangChainService(cnf.LLM)
+	llmSvc, err := llm.NewLLMService(cnf.LLM)
 	if err != nil {
 		panic(err) // In production, handle this error more gracefully
 	}
