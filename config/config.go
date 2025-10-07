@@ -14,6 +14,7 @@ type AppConfig struct {
 	Deployment Deployment
 	Firebase   Firebase
 	Database   Database
+	LLM        LLM
 }
 
 func NewAppConfig() *AppConfig {
@@ -50,6 +51,7 @@ func (a *AppConfig) Load() {
 	a.LoadDeploymentConfig()
 	a.LoadFirebaseConfig()
 	a.LoadDatabaseConfig()
+	a.LoadLLMConfig()
 }
 
 // LoadServerConfig load server config
@@ -120,5 +122,37 @@ func (a *AppConfig) LoadDatabaseConfig() {
 	mongoURL := os.Getenv("MONGO_URL")
 	if mongoURL != "" {
 		a.Database.MongoURL = mongoURL
+	}
+}
+
+// LoadLLMConfig loads the LLM configuration
+func (a *AppConfig) LoadLLMConfig() {
+	// load the default values
+	// then load from env variables
+	a.LLM.OpenAIAPIKey = ""
+	a.LLM.Model = "gpt-4o-mini"
+	a.LLM.Temperature = 0.7
+	a.LLM.MaxTokens = 4096
+
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey != "" {
+		a.LLM.OpenAIAPIKey = apiKey
+	}
+
+	model := os.Getenv("LLM_MODEL")
+	if model != "" {
+		a.LLM.Model = model
+	}
+
+	if temp := os.Getenv("LLM_TEMPERATURE"); temp != "" {
+		if v, err := strconv.ParseFloat(temp, 64); err == nil {
+			a.LLM.Temperature = v
+		}
+	}
+
+	if maxTokens := os.Getenv("LLM_MAX_TOKENS"); maxTokens != "" {
+		if v, err := strconv.Atoi(maxTokens); err == nil {
+			a.LLM.MaxTokens = v
+		}
 	}
 }
