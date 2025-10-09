@@ -6,18 +6,24 @@ import (
 	"time"
 
 	"github.com/Aryaman/syntra/sdk"
+	"github.com/Aryaman/syntra/services/agents"
+	"github.com/Aryaman/syntra/services/llm"
 	"github.com/google/uuid"
 )
 
 // ServiceImpl implements the GenerateService interface
 type ServiceImpl struct {
-	store GenerateStore
+	store        GenerateStore
+	llmService   llm.LLMService
+	orchestrator *agents.AgentOrchestrator
 }
 
 // NewService creates a new instance of GenerateService
-func NewService(store GenerateStore) GenerateService {
+func NewService(store GenerateStore, llmService llm.LLMService) GenerateService {
 	return &ServiceImpl{
-		store: store,
+		store:        store,
+		llmService:   llmService,
+		orchestrator: agents.NewAgentOrchestrator(llmService),
 	}
 }
 
@@ -244,7 +250,7 @@ func (s *ServiceImpl) Delete(ctx context.Context, id string, userId string) erro
 	return nil
 }
 
-// Execute executes a generate task to produce synthetic data
+// Execute executes a generate task to produce synthetic data using agentic flow
 func (s *ServiceImpl) Execute(ctx context.Context, id string, userId string) (*sdk.Generate, error) {
 	if id == "" {
 		return nil, fmt.Errorf("generate task ID is required")
@@ -269,9 +275,38 @@ func (s *ServiceImpl) Execute(ctx context.Context, id string, userId string) (*s
 	generate.UpdatedAt = time.Now()
 	generate.UpdatedBy = userId
 
-	// Here you would implement the actual data generation logic
-	// For now, we'll create sample output data based on the data type
-	outputData := s.generateSampleData(generate)
+	// Save initial status update
+	s.Update(ctx, generate)
+
+	// Prepare prompt for the agents
+	prompt := generate.Description
+	if prompt == "" {
+		prompt = fmt.Sprintf("Generate %s data with %d records", generate.DataType, generate.Count)
+	}
+
+	// Execute agentic flow
+	agentInput := &sdk.AgentInput{
+		Prompt:   prompt,
+		Schema:   generate.Schema,
+		Count:    generate.Count,
+		DataType: generate.DataType,
+		Format:   generate.Format,
+	}
+
+	// Run the multi-agent orchestration
+	result, err := s.orchestrator.ExecuteAgenticFlow(ctx, agentInput)
+	if err != nil {
+		// If execution fails, set status to failed
+		generate.Status = "failed"
+		generate.OutputData = map[string]interface{}{
+			"error": err.Error(),
+		}
+		s.Update(ctx, generate)
+		return nil, fmt.Errorf("agentic flow execution failed: %w", err)
+	}
+
+	// Combine results from all agents
+	outputData := s.orchestrator.CombineResults(result)
 	generate.OutputData = outputData
 
 	// Update status to completed
