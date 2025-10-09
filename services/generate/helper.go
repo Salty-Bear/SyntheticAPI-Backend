@@ -41,8 +41,6 @@ func fromModelToSdk(generate *models.Generate) *sdk.Generate {
 		Status:      generate.Status,
 		Enabled:     generate.Enabled,
 		UserId:      generate.UserId,
-		CreatedBy:   generate.CreatedBy,
-		UpdatedBy:   generate.UpdatedBy,
 		CreatedAt:   generate.CreatedAt,
 		UpdatedAt:   generate.UpdatedAt,
 		OutputData:  generate.OutputData,
