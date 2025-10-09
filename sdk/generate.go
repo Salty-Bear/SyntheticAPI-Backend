@@ -14,8 +14,6 @@ type Generate struct {
 	Status      string      `json:"status"`      // active, completed, failed, pending
 	Enabled     bool        `json:"enabled"`     // Whether the generate task is enabled
 	UserId      string      `json:"user_id"`     // ID of the user who owns this generate task
-	CreatedBy   string      `json:"created_by"`  // ID of the user who created this generate task
-	UpdatedBy   string      `json:"updated_by"`  // ID of the user who last updated this generate task
 	CreatedAt   time.Time   `json:"created_at"`  // Timestamp when the generate task was created
 	UpdatedAt   time.Time   `json:"updated_at"`  // Timestamp when the generate task was last updated
 	OutputData  interface{} `json:"output_data"` // Generated data result

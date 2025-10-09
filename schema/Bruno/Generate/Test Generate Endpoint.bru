@@ -1,0 +1,128 @@
+meta {
+  name: Test Generate Endpoint
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/generate/v1/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Test Data Generator",
+    "description": "Comprehensive test for generate endpoint",
+    "data_type": "json",
+    "count": 50,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "username": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 20
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "age": {
+          "type": "integer",
+          "minimum": 18,
+          "maximum": 65
+        },
+        "is_active": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "balance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["id", "username", "email"]
+    },
+    "format": "pretty",
+    "enabled": true
+  }
+}
+
+tests {
+  test("Status code is 201", function() {
+    expect(res.status).to.equal(201);
+  });
+  
+  test("Response has success flag", function() {
+    expect(res.body.success).to.equal(true);
+  });
+  
+  test("Response contains data", function() {
+    expect(res.body.data).to.be.an('object');
+  });
+  
+  test("Data has ID", function() {
+    expect(res.body.data.id).to.be.a('string');
+  });
+  
+  test("Message indicates success", function() {
+    expect(res.body.message).to.include('created successfully');
+  });
+}
+
+docs {
+  # Test Generate Endpoint
+  
+  This request tests the main generate endpoint functionality by creating a new data generation task.
+  
+  ## Features Tested:
+  - Creating a generate task with comprehensive JSON schema
+  - Schema validation with multiple data types (string, integer, boolean, number, array)
+  - Format specifications (uuid, email, date-time)
+  - Constraints (min/max values, lengths)
+  - Required fields validation
+  
+  ## Expected Response:
+  ```json
+  {
+    "success": true,
+    "message": "Generate task created successfully",
+    "data": {
+      "id": "generated-uuid",
+      "name": "Test Data Generator",
+      "description": "Comprehensive test for generate endpoint",
+      "data_type": "json",
+      "count": 50,
+      "schema": {...},
+      "format": "pretty",
+      "enabled": true,
+      "user_id": "current-user-id",
+      "created_at": "timestamp",
+      "updated_at": "timestamp"
+    }
+  }
+  ```
+  
+  ## Next Steps:
+  After creating the task, you can:
+  1. Execute it using the Execute endpoint: POST /generate/v1/{id}/execute
+  2. Get the task details: GET /generate/v1/{id}
+  3. List all tasks: GET /generate/v1/
+  4. Update the task: PUT /generate/v1/{id}
+  5. Delete the task: DELETE /generate/v1/{id}
+}

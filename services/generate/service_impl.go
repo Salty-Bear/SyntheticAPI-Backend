@@ -58,11 +58,6 @@ func (s *ServiceImpl) Create(ctx context.Context, generate *sdk.Generate) (*sdk.
 	generate.CreatedAt = now
 	generate.UpdatedAt = now
 
-	// Set created by if not provided
-	if generate.CreatedBy == "" {
-		generate.CreatedBy = generate.UserId
-	}
-
 	// Create database model from SDK generate
 	dbGenerate := fromSdkToModel(*generate)
 
@@ -198,14 +193,6 @@ func (s *ServiceImpl) Update(ctx context.Context, generate *sdk.Generate) (*sdk.
 		updates["output_data"] = generate.OutputData
 	}
 
-	// Update timestamps
-	updates["updated_at"] = time.Now()
-	if generate.UpdatedBy != "" {
-		updates["updated_by"] = generate.UpdatedBy
-	} else {
-		updates["updated_by"] = generate.UserId
-	}
-
 	// Update generate task
 	if err := s.store.UpdateGenerate(ctx, generate.ID, updates); err != nil {
 		return nil, fmt.Errorf("error updating generate task: %w", err)
@@ -267,7 +254,6 @@ func (s *ServiceImpl) Execute(ctx context.Context, id string, userId string) (*s
 	// Update status to active
 	generate.Status = "active"
 	generate.UpdatedAt = time.Now()
-	generate.UpdatedBy = userId
 
 	// Here you would implement the actual data generation logic
 	// For now, we'll create sample output data based on the data type
